@@ -1,6 +1,6 @@
 import './whats-new.scss';
 import changeLog from './whats-new.json';
-import { getPlugin } from './utils.js';
+import { getPlugin } from './utils.jsx';
 
 import { compareVersions } from 'compare-versions';
 

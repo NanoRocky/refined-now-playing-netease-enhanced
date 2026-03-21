@@ -19,8 +19,10 @@
         "jsx": "react",
         "jsxFactory": "h",
         "jsxFragmentFactory": "f",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "resolveJsonModule": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
         "strictNullChecks": true,
         "allowJs": false
     }

@@ -12,6 +12,7 @@
 	pointer-events: none;
 	transition: opacity .3s ease;
 	color: var(--rnp-accent-color-shade-2);
+
 	.album img {
 		height: 46px;
 		width: 46px;
@@ -19,7 +20,8 @@
 		box-shadow: 0 5px 5px rgb(0 0 0 / 5%), 0 0px 10px rgb(0 0 0 / 6%);
 		position: relative;
 		overflow: hidden;
-		&::after { 
+
+		&::after {
 			content: '';
 			display: block;
 			position: absolute;
@@ -32,24 +34,30 @@
 			filter: brightness(.2);
 		}
 	}
+
 	.info {
 		overflow: hidden;
 		line-height: 1.5;
-		> * {
+
+		>* {
 			overflow: hidden;
 			white-space: nowrap;
 			text-overflow: ellipsis;
 		}
+
 		.title {
 			font-size: 18px;
 		}
+
 		.artist {
 			font-size: 15px;
 			opacity: 0.6;
 		}
 	}
 }
-body.rnp-light, body.rnp-auto.rnp-system-light {
+
+body.rnp-light,
+body.rnp-auto.rnp-system-light {
 	.rnp-mini-song-info {
 		.album img::after {
 			background-color: var(--rnp-accent-color-shade-2-dark);
@@ -57,19 +65,24 @@ body.rnp-light, body.rnp-auto.rnp-system-light {
 		}
 	}
 }
+
 body:not(.lyric-only) .rnp-mini-song-info {
 	opacity: 0;
 }
+
 body.lyric-only {
 	&.auto-hide-mini-song-info.rnp-idle .rnp-mini-song-info {
 		opacity: 0;
 		//transition-delay: .3s;
 	}
+
 	&.mq-playing-scroll .rnp-mini-song-info {
 		opacity: 0 !important;
 		//transition-delay: 0s;
 	}
-	&:not(.rnp-idle), &:not(.auto-hide-mini-song-info) {
+
+	&:not(.rnp-idle),
+	&:not(.auto-hide-mini-song-info) {
 		.rnp-mini-song-info {
 			opacity: 1;
 		}

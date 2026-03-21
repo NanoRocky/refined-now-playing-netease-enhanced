@@ -1,6 +1,6 @@
 import { parseLyric } from './liblyric/index.ts'
-import { cyrb53, getSetting } from './utils.js'
-import { fetchAMLL } from './amll-provider.js'
+import { cyrb53, getSetting } from './utils.jsx'
+import { fetchAMLL } from './amll-provider.jsx'
 
 const preProcessLyrics = (lyrics) => {
 	if (!lyrics) return null;

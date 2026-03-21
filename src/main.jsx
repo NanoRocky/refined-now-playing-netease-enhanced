@@ -2,23 +2,22 @@ import './styles.scss';
 import './exclusive-modes.scss';
 import './FM.scss'
 import './experimental.scss';
-import settingsMenuHTML from './settings-menu.html';
+import settingsMenuHTML from './settings-menu.html?raw';
 import './settings-menu.scss';
-import { argb2Rgb, rgb2Argb } from './color-utils.js';
-import { waitForElement, waitForElementAsync, getSetting, setSetting, chunk, copyTextToClipboard, getPlugin } from './utils.js';
-import './refined-control-bar.js';
-import { Background } from './background.js';
-import { CoverShadow } from './cover-shadow.js';
-import { Lyrics } from './lyrics.js';
+import { argb2Rgb, rgb2Argb } from './color-utils.jsx';
+import { waitForElement, waitForElementAsync, getSetting, setSetting, chunk, copyTextToClipboard, getPlugin } from './utils.jsx';
+import './refined-control-bar.jsx';
+import { Background } from './background.jsx';
+import { CoverShadow } from './cover-shadow.jsx';
+import { Lyrics } from './lyrics.jsx';
 import { themeFromSourceColor, QuantizerCelebi, Hct, Score } from "@material/material-color-utilities";
-import { compatibilityWizard, hijackFailureNoticeCheck } from './compatibility-check.js';
-import { whatsNew } from './whats-new.js';
-import { showContextMenu } from './context-menu.js';
-import { MiniSongInfo } from './mini-song-info.js';
-import { ProgressbarPreview } from './progressbar-preview.js';
-import { FontSettings } from './font-settings.js';
+import { compatibilityWizard, hijackFailureNoticeCheck } from './compatibility-check.jsx';
+import { whatsNew } from './whats-new.jsx';
+import { showContextMenu } from './context-menu.jsx';
+import { MiniSongInfo } from './mini-song-info.jsx';
+import { ProgressbarPreview } from './progressbar-preview.jsx';
+import { FontSettings } from './font-settings.jsx';
 import './material-you-compatibility.scss';
-import { createRoot } from 'react-dom/client';
 
 const updateAccentColor = (name, argb, isFM = false) => {
 	const [r, g, b] = [...argb2Rgb(argb)];
@@ -584,8 +583,7 @@ const addSettingsMenu = async (isFM = false) => {
 		const customFont = getOptionDom('#custom-font');
 		bindCheckboxToClass(customFont, 'rnp-custom-font', false);
 		const customFontSectionContainer = getOptionDom('#rnp-custom-font-section');
-		const containerRoot = createRoot(customFontSectionContainer);
-		containerRoot.render(<FontSettings />);
+		ReactDOM.render(<FontSettings />, customFontSectionContainer);
 
 		// 实验性选项
 		const fluidMaxFramerate = getOptionDom('#fluid-max-framerate');

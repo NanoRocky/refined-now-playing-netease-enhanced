@@ -1,11 +1,13 @@
 .rnp-bg.fm-bg {
-    position: fixed;
-    top: 0;
-    z-index: -1;
+	position: fixed;
+	top: 0;
+	z-index: -1;
 }
+
 .m-fm {
-    width: min(max(80%, 1500px), calc(100% - max(50px, 5%)));
-	> .g-play {
+	width: min(max(80%, 1500px), calc(100% - max(50px, 5%)));
+
+	>.g-play {
 		height: calc(100vh - var(--bottombar-height, 72px) - 60px + 20px);
 		display: flex;
 		flex-direction: column;
@@ -14,76 +16,95 @@
 		width: 45%;
 		margin-bottom: 25px;
 		padding-bottom: clamp(30px, 5%, 60px);
+
 		.fmlrc {
 			height: unset;
 		}
-		
+
 		.fmplay {
 			margin-left: 35px;
 			width: unset !important;
+
 			.covers::after {
 				display: none;
 			}
+
 			.btnwrap {
 				display: block;
 			}
-			.btn, .btn:hover {
+
+			.btn,
+			.btn:hover {
 				background: transparent;
 				border: none;
 				opacity: .6;
+
 				svg {
 					fill: var(--rnp-accent-color-shade-2) !important;
 				}
 			}
+
 			.btn:hover {
 				opacity: 1 !important;
 			}
+
 			.playbtn {
 				right: 20px !important;
 				bottom: 20px !important;
 				left: unset !important;
 				top: unset !important;
 				background: #00000088;
+				-webkit-backdrop-filter: blur(10px);
 				backdrop-filter: blur(10px);
 				width: 20% !important;
 				height: 20% !important;
 				transition: opacity .3s ease, transform .25s ease;
+
 				&:hover {
 					transform: scale(1.05);
 				}
+
 				&[data-action='pause'] {
 					opacity: 0;
 					pointer-events: none;
 				}
+
 				svg.play {
 					display: block;
 					opacity: 1;
 				}
+
 				svg.pause {
 					display: none;
 				}
 			}
 		}
+
 		.m-playlrc .word {
 			display: none;
 		}
 
-		.fmplay .covers, .fmplay .covers .cvr {
+		.fmplay .covers,
+		.fmplay .covers .cvr {
 			width: clamp(200px, 20vw, 500px) !important;
 			height: clamp(200px, 20vw, 500px) !important;
 		}
+
 		.fmplay .covers .cvr {
 			border-radius: 16px;
 			box-shadow: 0 10px 10px rgb(0 0 0 / 5%), 0 0px 20px rgb(0 0 0 / 6%);
 			transition: transform 0.6s ease, opacity 0.6s ease;
 		}
+
 		.fmplay .covers .cvr-next {
 			opacity: 0.1;
+
 			&:hover {
 				opacity: 0.5;
 			}
 		}
 	}
+
 	.lyric {
 		position: absolute;
 		display: block;
@@ -93,77 +114,96 @@
 		width: 45%;
 	}
 
-	.m-playlrc .inf{
+	.m-playlrc .inf {
 		.title h1 {
 			font-size: 32px;
 			line-height: 1.5;
 			color: var(--rnp-accent-color-shade-2);
-		}		
+		}
+
 		h2 {
 			font-size: 20px;
 			line-height: 1;
 			opacity: .6;
 			margin-bottom: 5px;
 			color: rgba(var(--rnp-accent-color-shade-2-rgb), 0.55);
-		}		
+		}
+
 		.playfrom {
 			display: flex;
 			flex-direction: column;
 		}
+
 		li {
 			max-width: 100%;
 			width: unset;
 			color: #ffffff66;
 		}
+
 		.playfrom li span {
 			color: rgba(var(--rnp-accent-color-shade-2-rgb), 0.45);
 		}
+
 		.playfrom li a span {
 			color: rgba(var(--rnp-accent-color-shade-2-rgb), 0.45);
 		}
+
 		ul li a {
 			color: rgba(var(--rnp-accent-color-shade-2-rgb), 0.45);
 			margin-right: 4px;
 			margin-left: 4px;
 		}
+
 		ul li label {
 			color: transparent;
 			width: 18px;
 			display: inline-block;
 			background-color: var(--rnp-accent-color-shade-2);
 			-webkit-mask-position: center;
+			mask-position: center;
 			-webkit-mask-repeat: no-repeat;
+			mask-repeat: no-repeat;
 			pointer-events: none;
 			margin-right: 4px;
 			opacity: .4;
 		}
+
 		ul li:first-child label {
 			-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3C!-- Font Awesome Pro 6.0.0-alpha2 by %40fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) --%3E%3Cpath d='M256 16C123.461 16 16 123.419 16 256S123.461 496 256 496S496 388.581 496 256S388.539 16 256 16ZM80.715 256H79.627C70.549 256 63.229 247.99 64.065 238.658C72.364 146.017 146.49 72.06 239.274 64.055C248.291 63.278 256 70.791 256 80.132V80.132C256 88.482 249.786 95.363 241.727 96.077C164.745 102.898 103.148 164.347 96.153 241.354C95.401 249.634 88.771 256 80.715 256ZM256 352C202.976 352 160 309 160 256S202.976 160 256 160S352 203 352 256S309.024 352 256 352ZM256 224C238.303 224 224 238.25 224 256S238.303 288 256 288C273.697 288 288 273.75 288 256S273.697 224 256 224Z'/%3E%3C/svg%3E");
+
+			mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3C!-- Font Awesome Pro 6.0.0-alpha2 by %40fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) --%3E%3Cpath d='M256 16C123.461 16 16 123.419 16 256S123.461 496 256 496S496 388.581 496 256S388.539 16 256 16ZM80.715 256H79.627C70.549 256 63.229 247.99 64.065 238.658C72.364 146.017 146.49 72.06 239.274 64.055C248.291 63.278 256 70.791 256 80.132V80.132C256 88.482 249.786 95.363 241.727 96.077C164.745 102.898 103.148 164.347 96.153 241.354C95.401 249.634 88.771 256 80.715 256ZM256 352C202.976 352 160 309 160 256S202.976 160 256 160S352 203 352 256S309.024 352 256 352ZM256 224C238.303 224 224 238.25 224 256S238.303 288 256 288C273.697 288 288 273.75 288 256S273.697 224 256 224Z'/%3E%3C/svg%3E");
 		}
+
 		ul li:last-child label {
 			-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'%3E%3C!-- Font Awesome Pro 6.0.0-alpha2 by %40fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) --%3E%3Cpath d='M389.418 347.664C358.834 320.578 318.732 304 274.664 304H173.336C77.609 304 0 381.602 0 477.332C0 496.477 15.523 512 34.664 512H355.193C333.4 493.432 320 468.27 320 440C320 399.045 348.041 364.709 389.418 347.664ZM224 256C294.695 256 352 198.691 352 128S294.695 0 224 0C153.312 0 96 57.309 96 128S153.312 256 224 256ZM601.725 160.631L505.725 179.832C490.768 182.824 480 195.957 480 211.211V372.408C469.945 369.727 459.281 368 448 368C394.98 368 352 400.234 352 440C352 479.764 394.98 512 448 512S544 479.764 544 440V300.176L614.275 286.121C629.232 283.131 640 269.996 640 254.742V192.01C640 171.816 621.525 156.672 601.725 160.631Z'/%3E%3C/svg%3E");
+
+			mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'%3E%3C!-- Font Awesome Pro 6.0.0-alpha2 by %40fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) --%3E%3Cpath d='M389.418 347.664C358.834 320.578 318.732 304 274.664 304H173.336C77.609 304 0 381.602 0 477.332C0 496.477 15.523 512 34.664 512H355.193C333.4 493.432 320 468.27 320 440C320 399.045 348.041 364.709 389.418 347.664ZM224 256C294.695 256 352 198.691 352 128S294.695 0 224 0C153.312 0 96 57.309 96 128S153.312 256 224 256ZM601.725 160.631L505.725 179.832C490.768 182.824 480 195.957 480 211.211V372.408C469.945 369.727 459.281 368 448 368C394.98 368 352 400.234 352 440C352 479.764 394.98 512 448 512S544 479.764 544 440V300.176L614.275 286.121C629.232 283.131 640 269.996 640 254.742V192.01C640 171.816 621.525 156.672 601.725 160.631Z'/%3E%3C/svg%3E");
 		}
+
 		.playfrom li {
 			color: rgba(var(--rnp-accent-color-shade-2-rgb), 0.45);
 			font-size: 16px;
 			margin-top: 5px;
 			width: unset;
 			line-height: normal;
+
 			&:last-child {
 				order: -1;
 			}
 		}
 	}
+
 	::selection {
 		background-color: rgba(var(--rnp-accent-color-shade-2-rgb), 0.3) !important;
 	}
 }
-body:not(.rectangle-cover) .m-fm .fmplay .covers .cvr{
+
+body:not(.rectangle-cover) .m-fm .fmplay .covers .cvr {
 	border-radius: 1000px;
-    box-shadow: 0 0 0 8px #ffffff22;
+	box-shadow: 0 0 0 8px #ffffff22;
 }
 
-body.vertical-align-middle #page_pc_userfm_songplay > .g-play {
-    padding-bottom: 0;
-    justify-content: center;
+body.vertical-align-middle #page_pc_userfm_songplay>.g-play {
+	padding-bottom: 0;
+	justify-content: center;
 }

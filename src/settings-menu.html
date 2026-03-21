@@ -1,4 +1,4 @@
-<input id="rnp-settings" class="rnp-settings open" type="checkbox"></input>
+<input id="rnp-settings" class="rnp-settings open" type="checkbox" aria-label="Toggle Settings"></input>
 <div id="rnp-settings-menu" class="rnp-settings-menu">
 	<div class="rnp-settings-menu-tabs">
 		<div class="rnp-settings-menu-tab active" data-tab="appearance">外观</div>
@@ -239,12 +239,12 @@
 			<div class="rnp-lyric-offset">
 				<div>
 					<label class="rnp-checkbox-label">全局偏移</label>
-					<button class="rnp-slider-reset" id="rnp-lyric-offset-reset"></button>
+					<button class="rnp-slider-reset" id="rnp-lyric-offset-reset" aria-label="恢复默认歌词偏移"></button>
 					<div style="flex:1;"></div>
 					<label id="rnp-lyric-offset-number">0s</label>
 				</div>
 				<div class="rnp-slider-wrapper">
-					<input id="rnp-lyric-offset-slider" type="range" class="rnp-slider" min="-10000" max="10000" step="100" value="0" default="0">
+					<input id="rnp-lyric-offset-slider" type="range" class="rnp-slider" min="-10000" max="10000" step="100" value="0" default="0" aria-label="调整全局歌词偏移">
 				</div>
 				<div>
 					<button id="rnp-lyric-offset-sub">-</button>

@@ -3,6 +3,7 @@
 	padding: 0;
 	background-color: #00000055;
 	border-radius: 10px;
+	-webkit-backdrop-filter: blur(10px);
 	backdrop-filter: blur(10px);
 	z-index: 1000;
 	overflow: hidden;

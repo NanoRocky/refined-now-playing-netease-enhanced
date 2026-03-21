@@ -102,3 +102,8 @@ typings/
 
 # TernJS port file
 .tern-port
+
+# TEMP files
+.tmp/.tmp/
+
+.tmp/

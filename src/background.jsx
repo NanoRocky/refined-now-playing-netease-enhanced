@@ -1,12 +1,10 @@
 import './background.scss';
 import { getGradientFromPalette } from './color-utils';
-import ColorThief from 'colorthief';
+import { getPaletteSync } from 'colorthief';
 
 const useState = React.useState;
 const useEffect = React.useEffect;
 const useRef = React.useRef;
-
-const colorThief = new ColorThief();
 
 export function Background(props) {
 	const [type, setType] = useState(props.type ?? 'blur'); // blur, gradient, fluid , solid
@@ -116,7 +114,8 @@ function GradientBackground(props) {
 		console.log('loading image');
 		image.onload = () => {
 			console.log('image loaded');
-			const palette = colorThief.getPalette(image);
+			const paletteObjs = getPaletteSync(image);
+			const palette = paletteObjs.map(c => [c.rgb().r, c.rgb().g, c.rgb().b]);
 			setGradient(getGradientFromPalette(palette));
 		};
 		image.src = props.url;
