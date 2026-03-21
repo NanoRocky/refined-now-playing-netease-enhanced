@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
         },
         build: {
             lib: {
-                entry: path.resolve(__dirname, 'src/main.jsx'), // the entry point
+                entry: path.resolve(__dirname, 'src/main.tsx'), // the entry point
                 name: 'RefinedNowPlayingEnhanced',
                 formats: ['iife'],
                 fileName: () => 'main.js',

@@ -1,7 +1,7 @@
-export const rgb2Hsl = ([r, g, b]) => {
+export const rgb2Hsl = ([r, g, b]: [number, number, number]): [number, number, number] => {
 	r /= 255, g /= 255, b /= 255;
 	const max = Math.max(r, g, b), min = Math.min(r, g, b);
-	let h, s, l = (max + min) / 2;
+	let h: any, s: any, l = (max + min) / 2;
 
 	if (max == min) {
 		h = s = 0;
@@ -17,13 +17,13 @@ export const rgb2Hsl = ([r, g, b]) => {
 	}
 	return [h, s, l];
 }
-export const hsl2Rgb = ([h, s, l]) => {
-	let r, g, b;
+export const hsl2Rgb = ([h, s, l]: [number, number, number]): [number, number, number] => {
+	let r: any, g: any, b: any;
 
 	if (s == 0) {
 		r = g = b = l;
 	} else {
-		const hue2rgb = (p, q, t) => {
+		const hue2rgb = (p: number, q: number, t: number): number => {
 			if (t < 0) t += 1;
 			if (t > 1) t -= 1;
 			if (t < 1 / 6) return p + (q - p) * 6 * t;
@@ -39,18 +39,18 @@ export const hsl2Rgb = ([h, s, l]) => {
 	}
 	return [r * 255, g * 255, b * 255];
 }
-export const normalizeColor = ([r, g, b]) => {
+export const normalizeColor = ([r, g, b]: [number, number, number]): [number, number, number] => {
 	if (Math.max(r, g, b) - Math.min(r, g, b) < 5) {
 		return [150, 150, 150];
 	}
 
-	const mix = (a, b, p) => Math.round(a * (1 - p) + b * p);
+	const mix = (a: number, b: number, p: number): number => Math.round(a * (1 - p) + b * p);
 
 	const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
 	if (luminance < 60) {
-		[r, g, b] = [r, g, b].map((c) => mix(c, 255, 0.3 * (1 - luminance / 60)));
+		[r, g, b] = [r, g, b].map((c: any) => mix(c, 255, 0.3 * (1 - luminance / 60)));
 	} else if (luminance > 180) {
-		[r, g, b] = [r, g, b].map((c) => mix(c, 0, 0.5 * ((luminance - 180) / 76)));
+		[r, g, b] = [r, g, b].map((c: any) => mix(c, 0, 0.5 * ((luminance - 180) / 76)));
 	}
 
 	let [h, s, l] = rgb2Hsl([r, g, b]);
@@ -63,14 +63,15 @@ export const normalizeColor = ([r, g, b]) => {
 	return [r, g, b];
 }
 
-export const calcWhiteShadeColor = ([r, g, b], p = 0.50) => {
-	const mix = (a, b, p) => Math.round(a * (1 - p) + b * p);
-	return [r, g, b].map((c) => mix(c, 255, p));
+export const calcWhiteShadeColor = ([r, g, b]: [number, number, number], p: number = 0.50): [number, number, number] => {
+	const mix = (a: any, b: any, p: any) => Math.round(a * (1 - p) + b * p);
+	// @ts-ignore
+	return [r, g, b].map((c: any) => mix(c, 255, p));
 }
 
-export const calcLuminance = (color) => {
-	let [r, g, b] = color.map((c) => c / 255);
-	[r, g, b] = [r, g, b].map((c) => {
+export const calcLuminance = (color: [number, number, number]): number => {
+	let [r, g, b] = color.map((c: any) => c / 255);
+	[r, g, b] = [r, g, b].map((c: any) => {
 		if (c <= 0.03928) {
 			return c / 12.92;
 		}
@@ -79,19 +80,19 @@ export const calcLuminance = (color) => {
 	return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-export const rgb2Lab = (color) => {
-	let [r, g, b] = color.map((c) => c / 255);
-	[r, g, b] = [r, g, b].map((c) => {
+export const rgb2Lab = (color: [number, number, number]): [number, number, number] => {
+	let [r, g, b] = color.map((c: any) => c / 255);
+	[r, g, b] = [r, g, b].map((c: any) => {
 		if (c <= 0.03928) {
 			return c / 12.92;
 		}
 		return Math.pow((c + 0.055) / 1.055, 2.4);
 	});
-	[r, g, b] = [r, g, b].map((c) => c * 100);
+	[r, g, b] = [r, g, b].map((c: any) => c * 100);
 	const x = r * 0.4124 + g * 0.3576 + b * 0.1805;
 	const y = r * 0.2126 + g * 0.7152 + b * 0.0722;
 	const z = r * 0.0193 + g * 0.1192 + b * 0.9505;
-	const xyz2Lab = (c) => {
+	const xyz2Lab = (c: number): number => {
 		if (c > 0.008856) {
 			return Math.pow(c, 1 / 3);
 		}
@@ -103,7 +104,7 @@ export const rgb2Lab = (color) => {
 	return [L, A, B];
 }
 
-export const calcColorDifference = (color1, color2) => {
+export const calcColorDifference = (color1: [number, number, number], color2: [number, number, number]): number => {
 	const [L1, A1, B1] = rgb2Lab(color1);
 	const [L2, A2, B2] = rgb2Lab(color2);
 	const deltaL = L1 - L2;
@@ -112,12 +113,12 @@ export const calcColorDifference = (color1, color2) => {
 	return Math.sqrt(deltaL * deltaL + deltaA * deltaA + deltaB * deltaB);
 }
 
-export const getGradientFromPalette = (palette) => {
-	palette = palette.sort((a, b) => {
+export const getGradientFromPalette = (palette: [number, number, number][]): string => {
+	palette = palette.sort((a: any, b: any) => {
 		return calcLuminance(a) - calcLuminance(b);
 	});
 	palette = palette.slice(palette.length / 2 - 4, palette.length / 2 + 4);
-	palette = palette.sort((a, b) => {
+	palette = palette.sort((a: any, b: any) => {
 		return rgb2Hsl(b)[1] - rgb2Hsl(a)[1];
 	});
 	palette = palette.slice(0, 6);
@@ -134,8 +135,8 @@ export const getGradientFromPalette = (palette) => {
 	}
 
 	let used = new Array(6).fill(false);
-	let min = 10000000, ansSeq = [];
-	const dfs = (depth, seq = [], currentMax = -1) => {
+	let min = 10000000, ansSeq: any = [];
+	const dfs = (depth: number, seq: number[] = [], currentMax: number = -1): void => {
 		if (depth === 6) {
 			if (currentMax < min) {
 				min = currentMax;
@@ -170,18 +171,18 @@ export const getGradientFromPalette = (palette) => {
 	ans += ')';
 	return ans;
 }
-export const argb2Rgb = (x) => {
+export const argb2Rgb = (x: number): [number, number, number] => {
 	// const a = (x >> 24) & 0xff;
 	const r = (x >> 16) & 0xff;
 	const g = (x >> 8) & 0xff;
 	const b = x & 0xff;
 	return [r, g, b];
 };
-export const rgb2Argb = (r, g, b) => {
+export const rgb2Argb = (r: number, g: number, b: number): number => {
 	return (0xff << 24) | (r << 16) | (g << 8) | b;
 };
-export const Rgb2Hex = (r, g, b) => {
-	return '#' + [r, g, b].map((x) => {
+export const Rgb2Hex = (r: number, g: number, b: number): string => {
+	return '#' + [r, g, b].map((x: any) => {
 		const hex = x.toString(16);
 		return hex.length === 1 ? '0' + hex : hex;
 	}).join('');

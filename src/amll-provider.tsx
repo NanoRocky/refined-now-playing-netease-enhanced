@@ -1,8 +1,8 @@
-import { processLyric } from './liblyric/index.ts';
+import { processLyric } from './liblyric/index';
 
 const amllDbServer = "https://amlldb.bikonoo.com/ncm-lyrics/%s.ttml";
 
-export const fetchAMLL = async (id) => {
+export const fetchAMLL = async (id: string) => {
     const url = amllDbServer.replace("%s", id);
     try {
         const response = await fetch(url);
@@ -21,32 +21,32 @@ export const fetchAMLL = async (id) => {
         
         const converted = convertToRnpFormat(mergedLines);
         return processLyric(converted);
-    } catch (e) {
+    } catch (e: any) {
         console.error("AMLL fetch error", e);
         return null;
     }
 };
 
-const mergeLyrics = (lines) => {
+const mergeLyrics = (lines: any) => {
     // 过滤出主歌词行（无 role 或 role 为 background）
-    const contentLines = lines.filter(l => !l.role || l.role === 'background' || l.role === 'x-background');
-    const transLines = lines.filter(l => l.role === 'translation' || l.role === 'x-translation');
-    const romanLines = lines.filter(l => l.role === 'roman' || l.role === 'x-roman');
+    const contentLines = lines.filter((l: any) => !l.role || l.role === 'background' || l.role === 'x-background');
+    const transLines = lines.filter((l: any) => l.role === 'translation' || l.role === 'x-translation');
+    const romanLines = lines.filter((l: any) => l.role === 'roman' || l.role === 'x-roman');
 
     // 如果所有行都是主内容行，直接返回
     if (contentLines.length === lines.length) {
         return lines;
     }
 
-    return contentLines.map(line => {
+    return contentLines.map((line: any) => {
         // 寻找时间重叠的翻译行
-        const trans = transLines.find(t => isTimeOverlap(line, t));
+        const trans = transLines.find((t: any) => isTimeOverlap(line, t));
         if (trans) {
             line.translatedLyric = trans.text;
         }
         
         // 寻找时间重叠的罗马音行
-        const roman = romanLines.find(r => isTimeOverlap(line, r));
+        const roman = romanLines.find((r: any) => isTimeOverlap(line, r));
         if (roman) {
             line.romanLyric = roman.text;
         }
@@ -55,15 +55,15 @@ const mergeLyrics = (lines) => {
     });
 };
 
-const isTimeOverlap = (l1, l2) => {
+const isTimeOverlap = (l1: any, l2: any) => {
     // 允许 300ms 的误差
     return Math.abs(l1.startTime - l2.startTime) < 300;
 }
 
-const convertToRnpFormat = (lines) => {
-    return lines.map(line => {
+const convertToRnpFormat = (lines: any) => {
+    return lines.map((line: any) => {
         const words = line.words || [];
-        const dynamicLyric = words.map(w => ({
+        const dynamicLyric = words.map((w: any) => ({
             time: w.startTime,
             duration: w.endTime - w.startTime,
             flag: 0,
@@ -89,7 +89,7 @@ const convertToRnpFormat = (lines) => {
     });
 };
 
-const parseTTML = (ttmlContent) => {
+const parseTTML = (ttmlContent: any) => {
     try {
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(ttmlContent, "text/xml");
@@ -138,7 +138,7 @@ const parseTTML = (ttmlContent) => {
                     if (node.nodeType === Node.TEXT_NODE) {
                         const text = node.textContent;
                         // 保留非空文本或纯换行以外的字符
-                        if (text.trim() || (!text.includes('\n') && text.length > 0)) {
+                        if (text!.trim() || (!text!.includes('\n') && text!.length > 0)) {
                             textContent += text;
                             if (words.length > 0) {
                                 words[words.length - 1].word += text;
@@ -147,16 +147,17 @@ const parseTTML = (ttmlContent) => {
                             }
                         }
                         // 如果是空白字符（通常是空格），也需要追加到翻译和罗马音中，防止单词粘连
-                        if (!text.trim() && text.length > 0 && !text.includes('\n')) {
+                        if (!(text as any).trim() && text!.length > 0 && !(text as any).includes('\n')) {
                              if (spanTranslatedLyric.length > 0) spanTranslatedLyric += text;
                              if (spanRomanLyric.length > 0) spanRomanLyric += text;
                         }
-                    } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName.toLowerCase() === 'span') {
+                    } else if (node.nodeType === Node.ELEMENT_NODE && (node as any).tagName.toLowerCase() === 'span') {
                         const span = node;
-                        const spanBegin = parseTime(span.getAttribute("begin"));
-                        const spanEnd = parseTime(span.getAttribute("end"));
+                        const spanBegin = parseTime((span as any).getAttribute("begin"));
+                        const spanEnd = parseTime((span as any).getAttribute("end"));
                         let text = span.textContent || "";
                         
+                        // @ts-ignore
                         const spanRole = span.getAttribute("ttm:role") || span.getAttribute("role");
 
                         if (spanRole === 'x-translation' || spanRole === 'translation') {
@@ -176,8 +177,11 @@ const parseTTML = (ttmlContent) => {
                             if (span.childNodes.length > 0) {
                                 for (let k = 0; k < span.childNodes.length; k++) {
                                     const subNode = span.childNodes[k];
+                                    // @ts-ignore
                                     if (subNode.nodeType === Node.ELEMENT_NODE && subNode.tagName.toLowerCase() === 'span') {
+                                        // @ts-ignore
                                         const subBegin = parseTime(subNode.getAttribute("begin"));
+                                        // @ts-ignore
                                         const subEnd = parseTime(subNode.getAttribute("end"));
                                         const subText = subNode.textContent || "";
                                         if (subBegin !== null && subEnd !== null) {
@@ -284,15 +288,15 @@ const parseTTML = (ttmlContent) => {
             lines.push(...bgLinesInThisP);
         }
         
-        return lines.sort((a, b) => a.startTime - b.startTime);
+        return lines.sort((a: any, b: any) => a.startTime - b.startTime);
 
-    } catch (e) {
+    } catch (e: any) {
         console.error("TTML Parse Error", e);
         return [];
     }
 }
 
-const removeParentheses = (text) => {
+const removeParentheses = (text: any) => {
     let cleanText = text.trim();
     if ((cleanText.startsWith('(') && cleanText.endsWith(')')) || 
         (cleanText.startsWith('（') && cleanText.endsWith('）'))) {
@@ -301,15 +305,15 @@ const removeParentheses = (text) => {
     return cleanText;
 }
 
-const removeLeadingParenthesis = (text) => {
+const removeLeadingParenthesis = (text: any) => {
     return text.replace(/^[\s\u3000]*[((（]/, '');
 }
 
-const removeTrailingParenthesis = (text) => {
+const removeTrailingParenthesis = (text: any) => {
     return text.replace(/[)）][\s\u3000]*$/, '');
 }
 
-const parseTime = (timeStr) => {
+const parseTime = (timeStr: any) => {
     if (!timeStr) return null;
     const parts = timeStr.split(":");
     let seconds = 0;
@@ -323,11 +327,11 @@ const parseTime = (timeStr) => {
     return Math.round(seconds * 1000);
 }
 
-const cleanTTMLTranslations = (ttmlContent) => {
+const cleanTTMLTranslations = (ttmlContent: any) => {
     // 移除 XML 声明
     ttmlContent = ttmlContent.replace(/<\?xml.*?\?>/, '');
 
-    const lang_counter = (ttml_text) => {
+    const lang_counter = (ttml_text: any) => {
         const langRegex = /(?<=<(span|translation)[^<>]+)xml:lang="([^"]+)"/g;
         const matches = ttml_text.matchAll(langRegex);
         const langSet = new Set();
@@ -337,11 +341,11 @@ const cleanTTMLTranslations = (ttmlContent) => {
         return Array.from(langSet);
     };
 
-    const lang_filter = (langs) => {
+    const lang_filter = (langs: any) => {
         if (langs.length <= 1) return null;
         
-        const lang_matcher = (target) => {
-            return langs.find((lang) => {
+        const lang_matcher = (target: any) => {
+            return langs.find((lang: any) => {
                 try {
                     return new Intl.Locale(lang).maximize().script === target;
                 } catch {
@@ -356,16 +360,16 @@ const cleanTTMLTranslations = (ttmlContent) => {
         const hant_matched = lang_matcher("Hant");
         if (hant_matched) return hant_matched;
 
-        const major = langs.find((key) => key.startsWith("zh"));
+        const major = langs.find((key: any) => key.startsWith("zh"));
         if (major) return major;
 
         return langs[0];
     };
 
-    const ttml_cleaner = (ttml_text, major_lang) => {
+    const ttml_cleaner = (ttml_text: any, major_lang: any) => {
         if (major_lang === null) return ttml_text;
         // 仅保留匹配语言的 translation 和 span 标签
-        const replacer = (match, lang) => (lang === major_lang ? match : "");
+        const replacer = (match: any, lang: any) => (lang === major_lang ? match : "");
         const translationRegex = /<translation[^>]+xml:lang="([^"]+)"[^>]*>[\s\S]*?<\/translation>/g;
         const spanRegex = /<span[^>]+xml:lang="([^" ]+)"[^>]*>[\s\S]*?<\/span>/g;
         return ttml_text.replace(translationRegex, replacer).replace(spanRegex, replacer);

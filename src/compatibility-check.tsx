@@ -1,3 +1,4 @@
+import React from "react";
 import './compatibility-check.scss';
 import { compareVersions } from 'compare-versions';
 
@@ -5,21 +6,23 @@ const useState = React.useState;
 const useEffect = React.useEffect;
 const useRef = React.useRef;
 
-function Wizard(props) {
-	const [isNCMOutdated, setIsNCMOutdated] = useState(false);
-	const [isBetterNCMOutdated, setIsBetterNCMOutdated] = useState(false);
-	const [isGPUDisabled, setIsGPUDisabled] = useState(false);
-	const [isHijackDisabled, setIsHijackDisabled] = useState(false);
+function Wizard(props: { isFM?: boolean; src?: string; [key: string]: any; }) {
+	const [isNCMOutdated, setIsNCMOutdated] = useState<any>(false);
+	const [isBetterNCMOutdated, setIsBetterNCMOutdated] = useState<any>(false);
+	const [isGPUDisabled, setIsGPUDisabled] = useState<any>(false);
+	const [isHijackDisabled, setIsHijackDisabled] = useState<any>(false);
 
+	// @ts-ignore
 	useEffect(async () => {
 		try {
 			if (compareVersions(betterncm.ncm.getNCMVersion(), "2.10.6") < 0) {
 				setIsNCMOutdated(true);
 			}
-		} catch (e) {
+		} catch (e: any) {
 		}
 	}, []);
 
+	// @ts-ignore
 	useEffect(async () => {
 		try {
 			if (
@@ -30,20 +33,21 @@ function Wizard(props) {
 			) {
 				setIsBetterNCMOutdated(true);
 			}
-		} catch (e) {
+		} catch (e: any) {
 			setIsBetterNCMOutdated(true);
 		}
 	}, []);
 
+	// @ts-ignore
 	useEffect(async () => {
 		if (typeof(betterncm.app.readConfig) == "undefined") return;
 		try {
 			if (
 				await betterncm.app.readConfig("cc.microblock.betterncm.remove-disable-gpu") != "true" &&
-				await new Promise((resolve, reject) => {
+				await new Promise((resolve: any, reject: any) => {
 					channel.call(
 						"app.getLocalConfig", 
-						(GpuAccelerationEnabled) => {
+						(GpuAccelerationEnabled: any) => {
 							if (!~~GpuAccelerationEnabled) {
 								resolve(true);
 							} else {
@@ -57,16 +61,17 @@ function Wizard(props) {
 			) {
 				setIsGPUDisabled(true);
 			}
-		} catch (e) {
+		} catch (e: any) {
 		}
 	}, []);
 
+	// @ts-ignore
 	useEffect(async () => {
 		if (typeof(betterncm.app.readConfig) == "undefined") return;
 		try {
 			if (await betterncm.app.readConfig("cc.microblock.betterncm.cpp_side_inject_feature_disabled") == "true")
 				setIsHijackDisabled(true);
-		} catch (e) {
+		} catch (e: any) {
 		}
 	}, []);
 
@@ -80,12 +85,15 @@ function Wizard(props) {
 
 
 	return (
-		<div class="rnp-compatibility-check">
-			<div class="rnp-compatibility-check__title">
+		// @ts-ignore
+		<div className="rnp-compatibility-check">
+			// @ts-ignore
+			<div className="rnp-compatibility-check__title">
 				<h2>兼容性检查</h2>
 				<h3>Refined Now Playing</h3>
 			</div>
-			<div class="rnp-compatibility-check__content">
+			// @ts-ignore
+			<div className="rnp-compatibility-check__content">
 				<p>欢迎使用 Refined Now Playing。</p>
 				<p>在开始之前，请依照本提示检查和更正兼容性问题，否则可能会遇到渲染错误、性能降低、功能失效等问题。</p>
 				{isNCMOutdated && 
@@ -187,11 +195,11 @@ function Wizard(props) {
 					(isNCMOutdated || isBetterNCMOutdated || isGPUDisabled || isHijackDisabled) && 
 					<>
 						<Button text="跳过" disabledAfterDone={true} onClick={() => {
-							document.querySelector("#refined-now-playing-wizard").remove();
+							(document as any)!.querySelector("#refined-now-playing-wizard").remove();
 						}}/>
 						<Button text="跳过并不再提示" disabledAfterDone={true} onClick={() => {
 							localStorage.setItem("refined-now-playing-wizard-done", "true");
-							document.querySelector("#refined-now-playing-wizard").remove();
+							(document as any)!.querySelector("#refined-now-playing-wizard").remove();
 						}}/>
 					</>
 				}
@@ -200,12 +208,13 @@ function Wizard(props) {
 	)
 }
 
-function Button(props) {
-	const [clicked, setClicked] = useState(false);
-	const [disabled, setDisabled] = useState(false);
+function Button(props: { isFM?: boolean; src?: string; [key: string]: any; }) {
+	const [clicked, setClicked] = useState<any>(false);
+	const [disabled, setDisabled] = useState<any>(false);
 	return (
 		<button
-			class="action-button"
+			// @ts-ignore
+			className="action-button"
 			disabled={disabled || props.disabled}
 			onClick={async () => {
 				if (disabled) return;
@@ -236,7 +245,7 @@ export function compatibilityWizard(force = false) {
 }
 
 function HijackFailureNotice() {
-	const [clicked, setClicked] = useState(false);
+	const [clicked, setClicked] = useState<any>(false);
 
 	if (clicked) {
 		return null;
@@ -259,7 +268,7 @@ function HijackFailureNotice() {
 
 
 export async function hijackFailureNoticeCheck() {
-	if ((await betterncm.app.getSucceededHijacks()).filter(x => x.includes('RefinedNowPlaying')).length > 0) {
+	if ((await betterncm.app.getSucceededHijacks()).filter((x: any) => x.includes('RefinedNowPlaying')).length > 0) {
 		return;
 	}
 

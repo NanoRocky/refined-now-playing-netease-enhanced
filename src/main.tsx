@@ -4,22 +4,22 @@ import './FM.scss'
 import './experimental.scss';
 import settingsMenuHTML from './settings-menu.html?raw';
 import './settings-menu.scss';
-import { argb2Rgb, rgb2Argb } from './color-utils.jsx';
-import { waitForElement, waitForElementAsync, getSetting, setSetting, chunk, copyTextToClipboard, getPlugin } from './utils.jsx';
-import './refined-control-bar.jsx';
-import { Background } from './background.jsx';
-import { CoverShadow } from './cover-shadow.jsx';
-import { Lyrics } from './lyrics.jsx';
+import { argb2Rgb, rgb2Argb } from './color-utils';
+import { waitForElement, waitForElementAsync, getSetting, setSetting, chunk, copyTextToClipboard, getPlugin } from './utils';
+import './refined-control-bar';
+import { Background } from './background';
+import { CoverShadow } from './cover-shadow';
+import { Lyrics } from './lyrics';
 import { themeFromSourceColor, QuantizerCelebi, Hct, Score } from "@material/material-color-utilities";
-import { compatibilityWizard, hijackFailureNoticeCheck } from './compatibility-check.jsx';
-import { whatsNew } from './whats-new.jsx';
-import { showContextMenu } from './context-menu.jsx';
-import { MiniSongInfo } from './mini-song-info.jsx';
-import { ProgressbarPreview } from './progressbar-preview.jsx';
-import { FontSettings } from './font-settings.jsx';
+import { compatibilityWizard, hijackFailureNoticeCheck } from './compatibility-check';
+import { whatsNew } from './whats-new';
+import { showContextMenu } from './context-menu';
+import { MiniSongInfo } from './mini-song-info';
+import { ProgressbarPreview } from './progressbar-preview';
+import { FontSettings } from './font-settings';
 import './material-you-compatibility.scss';
 
-const updateAccentColor = (name, argb, isFM = false) => {
+const updateAccentColor = (name: any, argb: any, isFM = false) => {
 	const [r, g, b] = [...argb2Rgb(argb)];
 	if (isFM) {
 		document.body.style.setProperty(`--${name}-fm`, `rgb(${r}, ${g}, ${b})`);
@@ -45,8 +45,8 @@ const useGreyAccentColor = (isFM = false) => {
 	updateAccentColor('rnp-accent-color-bg-light', rgb2Argb(190, 190, 190), isFM);
 }
 
-let lastDom = null, lastIsFM = false;
-const calcAccentColor = (dom, isFM = false) => {
+let lastDom: any = null, lastIsFM = false;
+const calcAccentColor = (dom: HTMLElement | any, isFM = false) => {
 	lastDom = dom.cloneNode(true);
 	lastIsFM = isFM;
 
@@ -54,18 +54,19 @@ const calcAccentColor = (dom, isFM = false) => {
 	canvas.width = 50;
 	canvas.height = 50;
 	const ctx = canvas.getContext('2d');
-	ctx.drawImage(dom, 0, 0, dom.naturalWidth, dom.naturalHeight, 0, 0, 50, 50);
-	const pixels = chunk(ctx.getImageData(0, 0, 50, 50).data, 4).map((pixel) => {
+	ctx!.drawImage(dom, 0, 0, dom.naturalWidth, dom.naturalHeight, 0, 0, 50, 50);
+	// @ts-ignore
+	const pixels = chunk(ctx!.getImageData(0, 0, 50, 50).data, 4).map((pixel: any) => {
 		return ((pixel[3] << 24 >>> 0) | (pixel[0] << 16 >>> 0) | (pixel[1] << 8 >>> 0) | pixel[2]) >>> 0;
 	});
 	const quantizedColors = QuantizerCelebi.quantize(pixels, 128);
-	const sortedQuantizedColors = Array.from(quantizedColors).sort((a, b) => b[1] - a[1]);
+	const sortedQuantizedColors = Array.from(quantizedColors).sort((a: any, b: any) => b[1] - a[1]);
 
 	/*Array.from(quantizedColors).sort((a, b) => b[1] - a[1]).slice(0, 50).map((x) => {
 		console.log(...argb2Rgb(x[0]), x[1]);
 	});*/
-	const mostFrequentColors = sortedQuantizedColors.slice(0, 5).map((x) => argb2Rgb(x[0]));
-	if (mostFrequentColors.every((x) => Math.max(...x) - Math.min(...x) < 5)) {
+	const mostFrequentColors = sortedQuantizedColors.slice(0, 5).map((x: any) => argb2Rgb(x[0]));
+	if (mostFrequentColors.every((x: any) => Math.max(...x) - Math.min(...x) < 5)) {
 		useGreyAccentColor();
 		return;
 	}
@@ -77,15 +78,20 @@ const calcAccentColor = (dom, isFM = false) => {
 	const variant = window.accentColorVariant ?? 'primary';
 
 	// theme.schemes.light.bgDarken = (Hct.from(theme.palettes.neutral.hue, theme.palettes.neutral.chroma, 97.5)).toInt();
-	updateAccentColor('rnp-accent-color-dark', theme.schemes.dark[variant], isFM);
-	updateAccentColor('rnp-accent-color-on-primary-dark', (Hct.from(theme.palettes[variant].hue, theme.palettes[variant].chroma, 20)).toInt(), isFM);
-	updateAccentColor('rnp-accent-color-shade-1-dark', (Hct.from(theme.palettes[variant].hue, theme.palettes[variant].chroma, 80)).toInt(), isFM);
-	updateAccentColor('rnp-accent-color-shade-2-dark', (Hct.from(theme.palettes[variant].hue, theme.palettes[variant].chroma, 90)).toInt(), isFM);
+	updateAccentColor('rnp-accent-color-dark', (theme as any).schemes.dark[variant], isFM);
+	updateAccentColor('rnp-accent-color-on-primary-dark', (Hct.from((theme.palettes as any)[variant].hue, (theme as any).palettes[variant].chroma, 20)).toInt(), isFM);
+	// @ts-ignore
+	updateAccentColor('rnp-accent-color-shade-1-dark', (Hct.from(((theme as any).palettes as any)[variant].hue, theme.palettes[variant].chroma, 80)).toInt(), isFM);
+	// @ts-ignore
+	updateAccentColor('rnp-accent-color-shade-2-dark', (Hct.from(((theme as any) as any).palettes[variant].hue, theme.palettes[variant].chroma, 90)).toInt(), isFM);
 	updateAccentColor('rnp-accent-color-bg-dark', (Hct.from(theme.palettes.secondary.hue, theme.palettes.secondary.chroma, 20)).toInt(), isFM);
 
 	updateAccentColor('rnp-accent-color-light', theme.schemes.light.onPrimaryContainer, isFM);
-	updateAccentColor('rnp-accent-color-on-primary-light', (Hct.from(theme.palettes[variant].hue, theme.palettes[variant].chroma, 100)).toInt(), isFM);
-	updateAccentColor('rnp-accent-color-shade-1-light', (Hct.from(theme.palettes[variant].hue, theme.palettes[variant].chroma, 25)).toInt(), isFM);
+	// @ts-ignore
+	updateAccentColor('rnp-accent-color-on-primary-light', ((Hct as any).from((theme as any).palettes[variant].hue, theme.palettes[variant].chroma, 100)).toInt(), isFM);
+	// @ts-ignore
+	updateAccentColor('rnp-accent-color-shade-1-light', ((Hct as any).from(theme.palettes[variant].hue, theme.palettes[variant].chroma, 25)).toInt(), isFM);
+	// @ts-ignore
 	updateAccentColor('rnp-accent-color-shade-2-light', (Hct.from(theme.palettes[variant].hue, theme.palettes[variant].chroma, 15)).toInt(), isFM);
 	updateAccentColor('rnp-accent-color-bg-light', (Hct.from(theme.palettes.secondary.hue, theme.palettes.secondary.chroma, 90)).toInt(), isFM);
 }
@@ -109,7 +115,7 @@ const updateCDImage = () => {
 	const realCD = document.querySelector('.n-single .cdimg');
 
 	const update = () => {
-		const cdImage = imgDom.src;
+		const cdImage = (imgDom as any).src;
 		if (cdImage === lastCDImage) {
 			return;
 		}
@@ -117,11 +123,11 @@ const updateCDImage = () => {
 		calcAccentColor(imgDom);
 	}
 
-	if (imgDom.complete) {
+	if ((imgDom as any).complete) {
 		update();
-		realCD.classList.remove('loading');
+		realCD!.classList.remove('loading');
 	} else {
-		realCD.classList.add('loading');
+		(realCD as any).classList.add('loading');
 	}
 }
 	
@@ -136,10 +142,12 @@ const recalculateTitleSize = (forceRefresh = false) => {
 	if (!title) {
 		return;
 	}
-	if (title.innerText === lastTitle && !forceRefresh) {
+	if ((title as any).innerText === lastTitle && !forceRefresh) {
 		return;
 	}
-	lastTitle = title.innerText;
+	// @ts-ignore
+	(lastTitle as any) = title.innerText;
+	// @ts-ignore
 	const text = title.innerText;
 	const testDiv = document.createElement('div');
 	testDiv.style.position = 'absolute';
@@ -153,7 +161,7 @@ const recalculateTitleSize = (forceRefresh = false) => {
 
 	const maxThreshold = Math.max(Math.min(document.body.clientHeight * 0.05, 60), 45);
 	const minThreshold = 24;
-	const targetWidth = document.querySelector('.g-single-track .g-singlec-ct .n-single .mn .head .inf .title').clientWidth;
+	const targetWidth = (document as any).querySelector('.g-single-track .g-singlec-ct .n-single .mn .head .inf .title').clientWidth;
 
 	if (targetWidth == 0) {
 		return;
@@ -205,8 +213,9 @@ const moveTags = () => {
 	}
 	const existingTags = titleBase.querySelector("h1 > .tag-wrap");
 	if (existingTags) {
-		existingTags.remove();
+		(existingTags as any).remove();
 	}
+	// @ts-ignore
 	titleBase.querySelector("h1").appendChild(tags);
 }
 const calcTitleScroll = () => {
@@ -240,7 +249,7 @@ const calcTitleScroll = () => {
 	titleContainer.style.setProperty('--scroll-speed', `${(innerWidth - containerWidth) / 30}s`);*/
 }
 
-waitForElement("#main-player, .m-pinfo", (dom) => {
+waitForElement("#main-player, .m-pinfo", (dom: HTMLElement | any) => {
 	dom.addEventListener('mouseenter', () => {
 		document.body.classList.add('bottombar-hover');
 	});
@@ -249,7 +258,7 @@ waitForElement("#main-player, .m-pinfo", (dom) => {
 	});
 });
 
-const addOrRemoveGlobalClassByOption = (className, optionValue) => {
+const addOrRemoveGlobalClassByOption = (className: any, optionValue: any) => {
 	if (optionValue) {
 		document.body.classList.add(className);
 	} else {
@@ -265,9 +274,9 @@ const addSettingsMenu = async (isFM = false) => {
 		return;
 	}
 
-	const sliderEnhance = (slider) => {
+	const sliderEnhance = (slider: any) => {
 		const isMidSlider = slider.classList.contains("mid-slider");
-		slider.addEventListener("input", e => {
+		slider.addEventListener("input", (e: any) => {
 			const value = e.target.value;
 			const min = e.target.min;
 			const max = e.target.max;
@@ -282,7 +291,7 @@ const addSettingsMenu = async (isFM = false) => {
 			}
 		});
 		if (slider.parentElement.querySelector(".rnp-slider-reset")) {
-			slider.parentElement.querySelector(".rnp-slider-reset").addEventListener("click", e => {
+			slider.parentElement.querySelector(".rnp-slider-reset").addEventListener("click", (e: any) => {
 				const slider = e.target.parentElement.parentElement.querySelector(".rnp-slider");
 				slider.value = slider.getAttribute("default");
 				slider.dispatchEvent(new Event("input"));
@@ -291,76 +300,78 @@ const addSettingsMenu = async (isFM = false) => {
 		}
 		slider.dispatchEvent(new Event("input"));
 	}
-	const bindCheckboxToClass = (checkbox, className, defaultValue = false, callback = () => {}) => {
+	const bindCheckboxToClass = (checkbox: any, className: any, defaultValue = false, callback = () => {}) => {
 		checkbox.checked = getSetting(checkbox.id, defaultValue);
-		checkbox.addEventListener("change", e => {
+		checkbox.addEventListener("change", (e: any) => {
 			shouldSettingMenuReload[isFM ? 1 : 0] = true;
 			setSetting(checkbox.id, e.target.checked);
 			addOrRemoveGlobalClassByOption(className, e.target.checked);
+			// @ts-ignore
 			callback(e.target.checked);
 		});
 		addOrRemoveGlobalClassByOption(className, checkbox.checked);
+		// @ts-ignore
 		callback(checkbox.checked);
 	}
-	const bindCheckboxToFunction = (checkbox, func, defaultValue = false) => {
+	const bindCheckboxToFunction = (checkbox: any, func: any, defaultValue = false) => {
 		checkbox.checked = getSetting(checkbox.id, defaultValue);
-		checkbox.addEventListener("change", e => {
+		checkbox.addEventListener("change", (e: any) => {
 			shouldSettingMenuReload[isFM ? 1 : 0] = true;
 			setSetting(checkbox.id, e.target.checked);
 			func(e.target.checked);
 		});
 		func(checkbox.checked);
 	}
-	const bindSliderToCSSVariable = (slider, variable, defaultValue = 0, event = 'input', mapping = (x) => { return x }, addClassWhenAdjusting = '') => {
+	const bindSliderToCSSVariable = (slider: any, variable: any, defaultValue = 0, event = 'input', mapping = (x: any) => { return x }, addClassWhenAdjusting = '') => {
 		slider.value = getSetting(slider.id, defaultValue);
 		slider.dispatchEvent(new Event("input"));
-		slider.addEventListener(event, e => {
+		slider.addEventListener(event, (e: any) => {
 			const value = e.target.value;
 			document.body.style.setProperty(variable, mapping(value));
 		});
-		slider.addEventListener("change", e => {
+		slider.addEventListener("change", (e: any) => {
 			shouldSettingMenuReload[isFM ? 1 : 0] = true;
 			setSetting(slider.id, e.target.value);
 		});
 		if (addClassWhenAdjusting) {
-			slider.addEventListener("mousedown", e => {
+			slider.addEventListener("mousedown", (e: any) => {
 				document.body.classList.add(addClassWhenAdjusting);
 			});
-			slider.addEventListener("mouseup", e => {
+			slider.addEventListener("mouseup", (e: any) => {
 				document.body.classList.remove(addClassWhenAdjusting);
 			});
 		}
 		document.body.style.setProperty(variable, mapping(slider.value));
 		sliderEnhance(slider);
 	}
-	const bindSliderToFunction = (slider, func, defaultValue = 0, event = 'input', mapping = (x) => { return x }, addClassWhenAdjusting = '') => {
+	const bindSliderToFunction = (slider: any, func: any, defaultValue = 0, event = 'input', mapping = (x: any) => { return x }, addClassWhenAdjusting = '') => {
 		slider.value = getSetting(slider.id, defaultValue);
 		slider.dispatchEvent(new Event("input"));
-		slider.addEventListener(event, e => {
+		slider.addEventListener(event, (e: any) => {
 			const value = e.target.value;
 			func(mapping(value));
 		});
-		slider.addEventListener("change", e => {
+		slider.addEventListener("change", (e: any) => {
 			shouldSettingMenuReload[isFM ? 1 : 0] = true;
 			setSetting(slider.id, e.target.value);
 		});
 		if (addClassWhenAdjusting) {
-			slider.addEventListener("mousedown", e => {
+			slider.addEventListener("mousedown", (e: any) => {
 				document.body.classList.add(addClassWhenAdjusting);
 			});
-			slider.addEventListener("mouseup", e => {
+			slider.addEventListener("mouseup", (e: any) => {
 				document.body.classList.remove(addClassWhenAdjusting);
 			});
 		}
 		func(mapping(slider.value));
 		sliderEnhance(slider);
 	}
-	const bindSelectGroupToClasses = (selectGroup, defaultValue, mapping = (x) => { return x }, callback = (x) => {}) => {
+	const bindSelectGroupToClasses = (selectGroup: any, defaultValue: any, mapping = (x: any) => { return x }, callback = (x: any) => {}) => {
 		const buttons = selectGroup.querySelectorAll(".rnp-select-group-btn");
-		buttons.forEach(button => {
-			button.addEventListener("click", e => {
+		buttons.forEach((button: any) => {
+			button.addEventListener("click", (e: any) => {
 				const value = e.target.getAttribute("value");
-				buttons.forEach(button => {
+				buttons.forEach((button: any) => {
 					button.classList.remove("selected");
 					document.body.classList.remove(mapping(button.getAttribute("value")));
 				});
@@ -372,7 +383,7 @@ const addSettingsMenu = async (isFM = false) => {
 			});
 		});
 		const value = getSetting(selectGroup.id, defaultValue);
-		buttons.forEach(button => {
+		buttons.forEach((button: any) => {
 			if (button.getAttribute("value") === value) {
 				button.classList.add("selected");
 				document.body.classList.add(mapping(value));
@@ -383,7 +394,7 @@ const addSettingsMenu = async (isFM = false) => {
 		});
 		callback(value);
 	}
-	const getOptionDom = (selector) => {
+	const getOptionDom = (selector: any) => {
 		if (isFM) return document.querySelector(`${selector}-fm`);
 		return document.querySelector(selector);
 	}
@@ -402,26 +413,28 @@ const addSettingsMenu = async (isFM = false) => {
 		const alwaysShowBottomBar = getOptionDom('#always-show-bottombar');
 		const bottomProgressBar = getOptionDom('#bottom-progressbar');
 		const enableProgressbarPreview = getOptionDom('#enable-progressbar-preview');
-		bindSelectGroupToClasses(exclusiveModes, 'none', (x) => x === 'all' ? 'no-exclusive-mode' : x, () => {
+		bindSelectGroupToClasses(exclusiveModes, 'none', (x: any) => x === 'all' ? 'no-exclusive-mode' : x, () => {
 			window.dispatchEvent(new Event('recalc-lyrics'));
 			recalculateTitleSize();
 		});
 		bindCheckboxToClass(centerLyric, 'center-lyric', false);
 		bindCheckboxToClass(autoHideMiniSongInfo, 'auto-hide-mini-song-info', true);
-		bindSelectGroupToClasses(colorScheme, 'auto', (x) => `rnp-${x}`);
-		bindSelectGroupToClasses(accentColorVariant, 'primary', (x) => `accent-color-${x}`, (x) => {
+		bindSelectGroupToClasses(colorScheme, 'auto', (x: any) => `rnp-${x}`);
+		bindSelectGroupToClasses(accentColorVariant, 'primary', (x: any) => `accent-color-${x}`, (x: any) => {
 			if (x == 'off') document.body.classList.remove('enable-accent-color');
 			else document.body.classList.add('enable-accent-color');
 			window.accentColorVariant = (x == 'off') ? 'primary' : x;
 			recalcAccentColor();
 		});
-		bindCheckboxToClass(textShadow, 'rnp-shadow', false, (x) => {
+		// @ts-ignore
+		bindCheckboxToClass(textShadow, 'rnp-shadow', false, (x: any) => {
 			if (x) {
 				textGlow.checked = false;
 				textGlow.dispatchEvent(new Event('change'));
 			}
 		});
-		bindCheckboxToClass(textGlow, 'rnp-text-glow', false, (x) => {
+		// @ts-ignore
+		bindCheckboxToClass(textGlow, 'rnp-text-glow', false, (x: any) => {
 			if (x) {
 				textShadow.checked = false;
 				textShadow.dispatchEvent(new Event('change'));
@@ -439,10 +452,10 @@ const addSettingsMenu = async (isFM = false) => {
 		const rectangleCover = getOptionDom('#rectangle-cover');
 		const albumSize = getOptionDom('#album-size');
 		const coverBlurryShadow = getOptionDom('#cover-blurry-shadow');
-		bindSelectGroupToClasses(horizontalAlign, 'left', (x) => { return `horizontal-align-${x}` }, () => { recalculateTitleSize();});
-		bindSelectGroupToClasses(verticalAlign, 'bottom', (x) => { return `vertical-align-${x}` }, () => { recalculateTitleSize();});
+		bindSelectGroupToClasses(horizontalAlign, 'left', (x: any) => { return `horizontal-align-${x}` }, () => { recalculateTitleSize();});
+		bindSelectGroupToClasses(verticalAlign, 'bottom', (x: any) => { return `vertical-align-${x}` }, () => { recalculateTitleSize();});
 		bindCheckboxToClass(rectangleCover, 'rectangle-cover', true);
-		bindSliderToFunction(albumSize, (x) => {
+		bindSliderToFunction(albumSize, (x: any) => {
 			window.albumSize = x;
 			const img = getOptionDom('.n-single .cdimg img');// ?? getOptionDom('.m-fm .fmplay .covers .cvr.j-curr');
 			if (!img?.src) return;
@@ -451,8 +464,9 @@ const addSettingsMenu = async (isFM = false) => {
 			if (currentSrc !== newSrc) {
 				img.src = newSrc;
 			}
-		}, 200, 'change', (x) => { return x === 200 ? 210 : x });
-		bindCheckboxToClass(coverBlurryShadow, 'cover-blurry-shadow', true, (x) => {
+		}, 200, 'change', (x: any) => { return x === 200 ? 210 : x });
+		// @ts-ignore
+		bindCheckboxToClass(coverBlurryShadow, 'cover-blurry-shadow', true, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-cover-shadow-type', { detail: { type: x ? 'colorful' : 'black' } }));
 		});
 
@@ -467,18 +481,19 @@ const addSettingsMenu = async (isFM = false) => {
 		const bgOpacity = getOptionDom('#bg-opacity');
 		const gradientBgDynamic = getOptionDom('#gradient-bg-dynamic');
 		const staticFluid = getOptionDom('#static-fluid');
-		bindSelectGroupToClasses(backgroundType, 'blur', (x) => `rnp-bg-${x}`, (x) => {
+		bindSelectGroupToClasses(backgroundType, 'blur', (x: any) => `rnp-bg-${x}`, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-background-type', { detail: { type: x } }));
 		});
-		bindSliderToCSSVariable(bgBlur, '--bg-blur', 90, 'change', (x) => { return `${x}px` });
-		bindSliderToCSSVariable(bgDim, '--bg-dim', 55, 'change', (x) => { return x / 100 });
-		bindSliderToCSSVariable(bgDimForGradientBg, '--bg-dim-for-gradient-bg', 45, 'change', (x) => { return x / 100 });
-		bindSliderToCSSVariable(bgDimForFluidBg, '--bg-dim-for-fluid-bg', 30, 'change', (x) => { return x / 100 });
-		bindSliderToCSSVariable(bgBlurForNoneBgMask, '--bg-blur-for-none-bg-mask', 0, 'change', (x) => { return `${x}px` });
-		bindSliderToCSSVariable(bgDimForNoneBgMask, '--bg-dim-for-none-bg-mask', 0, 'change', (x) => { return x / 100 });
-		bindSliderToCSSVariable(bgOpacity, '--bg-opacity', 0, 'change', (x) => { return 1 - x / 100 });
+		bindSliderToCSSVariable(bgBlur, '--bg-blur', 90, 'change', (x: any) => { return `${x}px` });
+		bindSliderToCSSVariable(bgDim, '--bg-dim', 55, 'change', (x: any) => { return x / 100 });
+		bindSliderToCSSVariable(bgDimForGradientBg, '--bg-dim-for-gradient-bg', 45, 'change', (x: any) => { return x / 100 });
+		bindSliderToCSSVariable(bgDimForFluidBg, '--bg-dim-for-fluid-bg', 30, 'change', (x: any) => { return x / 100 });
+		bindSliderToCSSVariable(bgBlurForNoneBgMask, '--bg-blur-for-none-bg-mask', 0, 'change', (x: any) => { return `${x}px` });
+		bindSliderToCSSVariable(bgDimForNoneBgMask, '--bg-dim-for-none-bg-mask', 0, 'change', (x: any) => { return x / 100 });
+		bindSliderToCSSVariable(bgOpacity, '--bg-opacity', 0, 'change', (x: any) => { return 1 - x / 100 });
 		bindCheckboxToClass(gradientBgDynamic, 'gradient-bg-dynamic', true);
-		bindCheckboxToClass(staticFluid, 'static-fluid', false, (x) => {
+		// @ts-ignore
+		bindCheckboxToClass(staticFluid, 'static-fluid', false, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-static-fluid', { detail: x }));
 		});
 
@@ -504,47 +519,48 @@ const addSettingsMenu = async (isFM = false) => {
 		bindCheckboxToClass(enableAMLL, 'enable-amll', true);
 		bindCheckboxToClass(originalLyricBold, 'original-lyric-bold', true);
 
-		bindSliderToFunction(lyricFontSize, (x) => {
+		bindSliderToFunction(lyricFontSize, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-lyric-font-size', { detail: x }));
 		}, 32, 'change');
-		bindSliderToFunction(lyricRomajiSizeEm, (x) => {
+		bindSliderToFunction(lyricRomajiSizeEm, (x: any) => {
 			document.body.style.setProperty('--lyric-romaji-size-em', `${x}em`);
 			window.dispatchEvent(new Event('recalc-lyrics'));
 		}, 0.6, 'change');
-		bindSliderToFunction(lyricTranslationSizeEm, (x) => {
+		bindSliderToFunction(lyricTranslationSizeEm, (x: any) => {
 			document.body.style.setProperty('--lyric-translation-size-em', `${x}em`);
 			window.dispatchEvent(new Event('recalc-lyrics'));
 		}, 1.0, 'change');
 
-		bindCheckboxToFunction(lyricZoom, (x) => {
+		bindCheckboxToFunction(lyricZoom, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-lyric-zoom', { detail: x }));
 		}, false);
-		bindCheckboxToFunction(lyricFade, (x) => {
+		bindCheckboxToFunction(lyricFade, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-lyric-fade', { detail: x }));
 		}, false);
-		bindCheckboxToFunction(lyricBlur, (x) => {
+		bindCheckboxToFunction(lyricBlur, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-lyric-blur', { detail: x }));
 		}, false);
-		bindCheckboxToClass(lyricRotate, 'lyric-rotate', false, (x) => {
+		// @ts-ignore
+		bindCheckboxToClass(lyricRotate, 'lyric-rotate', false, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-lyric-rotate', { detail: x }));
 		});
-		bindSliderToFunction(RotateCurvature, (x) => {
+		bindSliderToFunction(RotateCurvature, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-rotate-curvature', { detail: x }));
 		}, 25, 'change');
-		bindSelectGroupToClasses(karaokeAnimation, 'float', (x) => `rnp-karaoke-animation-${x}`, (x) => {
+		bindSelectGroupToClasses(karaokeAnimation, 'float', (x: any) => `rnp-karaoke-animation-${x}`, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-karaoke-animation', { detail: x }));
 		});
-		bindSelectGroupToClasses(currentLyricAlignmentPercentage, '50', (x) => `rnp-current-lyric-alignment-${x}`, (x) => {
+		bindSelectGroupToClasses(currentLyricAlignmentPercentage, '50', (x: any) => `rnp-current-lyric-alignment-${x}`, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-current-lyric-alignment-percentage', { detail: parseInt(x) }));
 		});
-		bindCheckboxToFunction(lyricStagger, (x) => {
+		bindCheckboxToFunction(lyricStagger, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-lyric-stagger', { detail: x }));
 		}, true);
-		bindSelectGroupToClasses(lyricAnimationTiming, 'smooth', (x) => `rnp-lyric-animation-timing-${x}`);
-		bindCheckboxToFunction(lyricGlow, (x) => {
+		bindSelectGroupToClasses(lyricAnimationTiming, 'smooth', (x: any) => `rnp-lyric-animation-timing-${x}`);
+		bindCheckboxToFunction(lyricGlow, (x: any) => {
 			document.dispatchEvent(new CustomEvent('rnp-lyric-glow', { detail: x }));
 		}, true);
-		bindSelectGroupToClasses(lyricContributorsDisplay, 'hover', (x) => `rnp-lyric-contributors-${x}`);
+		bindSelectGroupToClasses(lyricContributorsDisplay, 'hover', (x: any) => `rnp-lyric-contributors-${x}`);
 
 		const lyricOffsetSlider = getOptionDom('#rnp-lyric-offset-slider');
 		const lyricOffsetAdd = getOptionDom('#rnp-lyric-offset-add');
@@ -552,7 +568,7 @@ const addSettingsMenu = async (isFM = false) => {
 		const lyricOffsetReset = getOptionDom('#rnp-lyric-offset-reset');
 		const lyricOffsetNumber = getOptionDom('#rnp-lyric-offset-number');
 		const lyricOffsetTip = getOptionDom('#rnp-lyric-offset-tip');
-		bindSliderToFunction(lyricOffsetSlider, (ms) => {
+		bindSliderToFunction(lyricOffsetSlider, (ms: any) => {
 			ms = parseInt(ms);
 			document.dispatchEvent(new CustomEvent('rnp-global-offset', { detail: ms }));
 			lyricOffsetNumber.innerHTML = `${['-', '', '+'][Math.sign(ms) + 1]}${(Math.abs(ms) / 1000).toFixed(1).replace(/\.0$/, '')}s`;
@@ -564,7 +580,7 @@ const addSettingsMenu = async (isFM = false) => {
 			setSetting('lyric-offset', ms);
 		}, parseInt(getSetting('lyric-offset', 0)), 'change');
 
-		const setLyricOffsetValue = (ms) => {
+		const setLyricOffsetValue = (ms: any) => {
 			lyricOffsetSlider.value = ms;
 			lyricOffsetSlider.dispatchEvent(new Event('input'));
 			lyricOffsetSlider.dispatchEvent(new Event('change'));
@@ -590,7 +606,7 @@ const addSettingsMenu = async (isFM = false) => {
 		const fluidBlur = getOptionDom('#fluid-blur');
 		const hideEntireBottombar = getOptionDom('#hide-entire-bottombar-when-idle');
 		const presentationMode = getOptionDom('#presentation-mode');
-		bindSliderToFunction(fluidMaxFramerate, (x) => {
+		bindSliderToFunction(fluidMaxFramerate, (x: any) => {
 			x = parseInt(x);
 			const arr = ['5', '10', '30', '60', 'inf'];
 			for (let i = 0; i <= 4; i++) {
@@ -598,9 +614,10 @@ const addSettingsMenu = async (isFM = false) => {
 			}
 			document.body.classList.add(`rnp-fluid-max-framerate-${arr[x]}`);
 		}, getSetting('fluid-max-framerate', 5), 'change');
-		bindSliderToCSSVariable(fluidBlur, '--fluid-blur', 6, 'change', (x) => `${parseInt(Math.pow(2, x))}px`);
+		// @ts-ignore
+		bindSliderToCSSVariable(fluidBlur, '--fluid-blur', 6, 'change', (x: any) => `${parseInt(Math.pow(2, x))}px`);
 		bindCheckboxToClass(hideEntireBottombar, 'hide-entire-bottombar-when-idle', false);
-		presentationMode.addEventListener("change", e => {
+		presentationMode.addEventListener("change", (e: any) => {
 			addOrRemoveGlobalClassByOption('presentation-mode', e.target.checked);
 		});
 
@@ -620,20 +637,20 @@ const addSettingsMenu = async (isFM = false) => {
 			whatsNew(true);
 		});
 	}
-	const initTabs = (menu) => {
+	const initTabs = (menu: any) => {
 		const tabs = menu.querySelectorAll('.rnp-settings-menu-tabs .rnp-settings-menu-tab');
 		const container = menu.querySelector('.rnp-settings-menu-inner');
 		const sections = container.querySelectorAll('.rnp-group');
 		let active = container.querySelector('.rnp-group.active')?.dataset?.tab ?? 'appearance';
-		const setActive = (name) => {
+		const setActive = (name: any) => {
 			if (name === active) return;
 			active = name;
-			tabs.forEach((x) => {
+			tabs.forEach((x: any) => {
 				if (x.dataset.tab === name) x.classList.add('active');
 				else x.classList.remove('active');
 			});			
 		};
-		tabs.forEach((x) => {
+		tabs.forEach((x: any) => {
 			x.addEventListener('click', () => {
 				const top = container.querySelector(`.rnp-group[data-tab="${x.dataset.tab}"]`).offsetTop + 5;
 				container.scrollTo({ top, behavior: 'smooth' });
@@ -646,7 +663,7 @@ const addSettingsMenu = async (isFM = false) => {
 				return;
 			}
 			let name = active;
-			sections.forEach((x) => {
+			sections.forEach((x: any) => {
 				if (x.offsetTop <= top) name = x.dataset.tab;
 			});
 			setActive(name);
@@ -667,11 +684,14 @@ const addSettingsMenu = async (isFM = false) => {
 		settingsMenu.innerHTML = settingsMenuHTML;
 	}
 
-	if (document.querySelector(settingsMenu.id)) {
+	if (document!.querySelector((settingsMenu as any).id)) {
+		// @ts-ignore
 		document.querySelector(settingsMenu.id).remove();
 	}
 
+	// @ts-ignore
 	if (!isFM) document.querySelector('.g-single').appendChild(settingsMenu);
+	// @ts-ignore
 	else document.querySelector('#page_pc_userfm_songplay').appendChild(settingsMenu);
 	initSettings();
 	initTabs(settingsMenu);
@@ -694,8 +714,8 @@ const toggleFullScreen = (force = null) => {
 		if (loadedPlugins['RoundCornerNCM']) {
 			betterncm.app.setRoundedCorner(false);
 		}
-		document.body.classList.add('rnp-full-screen');
-		document.querySelector('.rnp-full-screen-button').title = '退出全屏';
+		document!.body.classList.add('rnp-full-screen');
+		(document as any).querySelector('.rnp-full-screen-button').title = '退出全屏';
 		
 	} else {
 		if (document.exitFullscreen) {
@@ -704,8 +724,8 @@ const toggleFullScreen = (force = null) => {
 			if (loadedPlugins['RoundCornerNCM']) {
 				betterncm.app.setRoundedCorner(true);
 			}
-			document.body.classList.remove('rnp-full-screen');
-			document.querySelector('.rnp-full-screen-button').title = '全屏';
+			document!.body.classList.remove('rnp-full-screen');
+			(document as any).querySelector('.rnp-full-screen-button').title = '全屏';
 		}
 	}
 }
@@ -725,7 +745,8 @@ const addFullScreenButton = () => {
 		var minutes = currentTime.getMinutes();
 	  
 		// 格式化小时和分钟，确保是两位数
-		hours = ('0' + hours).slice(-2);
+		(hours as any) = (('0' as any) + hours).slice(-2);
+		// @ts-ignore
 		minutes = ('0' + minutes).slice(-2);
 		fullScreenClock.textContent = hours + ':' + minutes;
 	  }
@@ -736,14 +757,16 @@ const addFullScreenButton = () => {
 
 new MutationObserver(() => {
 	if (!document.body.classList.contains('mq-playing') && document.body.classList.contains('rnp-full-screen')) {
+		// @ts-ignore
 		toggleFullScreen(false);
 	}
 }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
 // intercept src setter of HTMLImageElement
 const _src = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
-Object.defineProperty(HTMLImageElement.prototype, 'src', {
+Object.defineProperty(HTMLImageElement!.prototype, 'src', {
 	get: function() {
+		// @ts-ignore
 		return _src.get.call(this);
 	},
 	set: function(src) {
@@ -757,12 +780,13 @@ Object.defineProperty(HTMLImageElement.prototype, 'src', {
 				src = 'orpheus://cache/?https://p1.music.126.net/UeTuwE7pvjBpypWLudqukA==/3132508627578625.jpg';
 			}
 		}
+		// @ts-ignore
 		return _src.set.call(this, src);
 	}
 });
 
 
-plugin.onLoad(async (p) => {
+plugin.onLoad(async (p: any) => {
 	compatibilityWizard();
 
 	document.body.classList.add('refined-now-playing');
@@ -772,13 +796,14 @@ plugin.onLoad(async (p) => {
 	}
 
 	new MutationObserver(async () => { // Now playing page
-		if (document.querySelector('.g-single:not(.patched)')) {
+		if (document!.querySelector('.g-single:not(.patched)')) {
+			// @ts-ignore
 			document.querySelector('.g-single').classList.add('patched');
-			waitForElement('.n-single .cdimg img', (dom) => {
+			waitForElement('.n-single .cdimg img', (dom: HTMLElement | any) => {
 				dom.addEventListener('load', updateCDImage);
 				new MutationObserver(updateCDImage).observe(dom, {attributes: true, attributeFilter: ['src']});
 
-				dom.addEventListener('contextmenu', (e) => {
+				dom.addEventListener('contextmenu', (e: any) => {
 					e.preventDefault();
 					e.stopPropagation();
 					const imageURL = dom.src.replace(/^orpheus:\/\/cache\/\?/, '').replace(/\?.*$/, '');
@@ -799,9 +824,9 @@ plugin.onLoad(async (p) => {
 				});
 			});
 
-			waitForElement('.g-single .g-singlec-ct .n-single .mn .head .inf', (dom) => {
-				const addCopySelectionToItems = (items, closetSelector) => {
-					const selection = window.getSelection();
+			waitForElement('.g-single .g-singlec-ct .n-single .mn .head .inf', (dom: HTMLElement | any) => {
+				const addCopySelectionToItems = (items: any, closetSelector: any) => {
+					const selection = (window! as any).getSelection();
 					if (selection.toString().trim() && selection.baseNode.parentElement.closest(closetSelector)) {
 						const selectedText = selection.toString().trim();												
 						items.unshift({
@@ -812,7 +837,7 @@ plugin.onLoad(async (p) => {
 						});
 					}
 				};
-				dom.addEventListener('contextmenu', (e) => {
+				dom.addEventListener('contextmenu', (e: any) => {
 					e.preventDefault();
 					e.stopPropagation();
 
@@ -854,9 +879,10 @@ plugin.onLoad(async (p) => {
 			ReactDOM.render(
 				<Background
 					type={getSetting('background-type', 'fluid')}
-					image={ await waitForElementAsync('.n-single .cdimg img') }
+					image={ await waitForElementAsync!(('.n-single .cdimg img' as any)) }
 				/>
 			, background);
+			// @ts-ignore
 			document.querySelector('.g-single').appendChild(background);
 
 			const coverShadowController = document.createElement('div');
@@ -865,13 +891,13 @@ plugin.onLoad(async (p) => {
 			document.body.appendChild(coverShadowController);
 
 
-			waitForElement('.g-single-track .g-singlec-ct .n-single .mn .lyric', (oldLyrics) => {
+			waitForElement('.g-single-track .g-singlec-ct .n-single .mn .lyric', (oldLyrics: any) => {
 				oldLyrics.remove();
 			});
 			const lyrics = document.createElement('div');
 			lyrics.classList.add('lyric');
 			ReactDOM.render(<Lyrics />, lyrics);
-			waitForElement('.g-single-track .g-singlec-ct .n-single .wrap', (dom) => {
+			waitForElement('.g-single-track .g-singlec-ct .n-single .wrap', (dom: HTMLElement | any) => {
 				dom.appendChild(lyrics);
 			});
 
@@ -881,13 +907,15 @@ plugin.onLoad(async (p) => {
 				ReactDOM.render(
 					<MiniSongInfo
 						image={ await waitForElementAsync('.n-single .cdimg img') }
-						infContainer={ await waitForElementAsync('.g-single .g-singlec-ct .n-single .mn .head .inf') }
+						infContainer={ await waitForElementAsync(('.g-single .g-singlec-ct .n-single .mn .head .inf' as any)) }
 					/>
 				, miniSongInfo);
+				// @ts-ignore
 				document.querySelector('.g-single').appendChild(miniSongInfo);
 			}, 0);
 
 			addSettingsMenu();
+			// @ts-ignore
 			addFullScreenButton(document.querySelector('.g-single'));
 
 			whatsNew();
@@ -900,13 +928,13 @@ plugin.onLoad(async (p) => {
 	}).observe(document.body, { childList: true , subtree: true, attributes: true, characterData: true, attributeFilter: ['src']});
 
 	// Add progressbar hover preview
-	waitForElement('#main-player .prg', (dom) => {
+	waitForElement('#main-player .prg', (dom: HTMLElement | any) => {
 		const progressbarPreview = document.createElement('div');
 		progressbarPreview.classList.add('rnp-progressbar-preview');
 		ReactDOM.render(<ProgressbarPreview dom={dom}/>, progressbarPreview);
 		document.body.appendChild(progressbarPreview);
 	});
-	waitForElement('.m-player-fm .prg', (dom) => {
+	waitForElement('.m-player-fm .prg', (dom: HTMLElement | any) => {
 		const progressbarPreview = document.createElement('div');
 		progressbarPreview.classList.add('rnp-progressbar-preview');
 		progressbarPreview.classList.add('rnp-progressbar-preview-fm');
@@ -950,12 +978,14 @@ plugin.onLoad(async (p) => {
 	
 	// 私人 FM
 	const patchFM = async () => {
-		if (document.querySelector('#page_pc_userfm_songplay:not(.patched)')) {
+		if (document!.querySelector(('#page_pc_userfm_songplay:not(.patched)' as any))) {
+			// @ts-ignore
 			document.querySelector('#page_pc_userfm_songplay').classList.add('patched');
 			FMObserver.disconnect();
 			
-			const lyrics = document.createElement('div');
+			const lyrics = document!.createElement(('div' as any));
 			lyrics.classList.add('lyric');
+			// @ts-ignore
 			document.querySelector('#page_pc_userfm_songplay').appendChild(lyrics);
 			ReactDOM.render(<Lyrics isFM={true}/>, lyrics);
 			for (let i = 0; i < 15; i++) {
@@ -973,12 +1003,13 @@ plugin.onLoad(async (p) => {
 						await waitForElementAsync('#page_pc_userfm_songplay .fmplay .covers')
 					}
 					isFM={true}
-					imageChangedCallback={(dom) => {
+					imageChangedCallback={(dom: HTMLElement | any) => {
 						if (!dom) return;
-						calcAccentColor(dom, true);
+						(calcAccentColor as any)!(dom, true);
 					}}
 				/>
 			, background);
+			// @ts-ignore
 			document.querySelector('#page_pc_userfm_songplay').appendChild(background);
 			addSettingsMenu(true);
 		}
@@ -1000,7 +1031,7 @@ plugin.onLoad(async (p) => {
 	});
 
 	// Listen system theme change
-	const toggleSystemDarkmodeClass = (media) => {
+	const toggleSystemDarkmodeClass = (media: any) => {
 		document.body.classList.add(media.matches ? 'rnp-system-dark' : 'rnp-system-light');
 		document.body.classList.remove(media.matches ? 'rnp-system-light' : 'rnp-system-dark');
 		if (document.body.classList.contains('rnp-system-dynamic-theme-auto')) {
@@ -1012,12 +1043,15 @@ plugin.onLoad(async (p) => {
 	toggleSystemDarkmodeClass(systemDarkmodeMedia);
 
 	// Idle detection
-	const IdleThreshold = 1.5 * 1000;
+	const IdleThreshold: any = 1.5 * 1000;
+	// @ts-ignore
 	let idleTimer = null;
 	let idle = false;
+	// @ts-ignore
 	let debounceTime = null;
-	let debounceTimer = null;
+	let debounceTimer: any = null;
 	const resetIdleTimer = () => {
+		// @ts-ignore
 		if (idleTimer) clearTimeout(idleTimer);
 		idleTimer = setTimeout(() => {
 			idle = true;
@@ -1033,26 +1067,28 @@ plugin.onLoad(async (p) => {
 		}
 		resetIdleTimer();
 	}
-	const setIdle = () => {
+	const setIdle: any = () => {
 		debounceTimer = setTimeout(() => {
+			// @ts-ignore
 			if (idleTimer) clearTimeout(idleTimer);
 			idle = true;
 			document.body.classList.add('rnp-idle');
+		// @ts-ignore
 		}, Math.max((debounceTime ?? 0) + 325 - new Date().getTime(), 0));
 	}
 	resetIdleTimer();
 	document.addEventListener('mousemove', resetIdle);
-	document.addEventListener('mouseout', (e) => {
+	document.addEventListener('mouseout', (e: any) => {
 		if (e.relatedTarget === null) {
 			setIdle();
 		}
 	});
 
 	// Listen for now playing open
-	new MutationObserver((mutations) => {
-		mutations.forEach((mutation) => {
+	new MutationObserver((mutations: any) => {
+		mutations.forEach((mutation: any) => {
 			if (mutation.addedNodes.length > 0) {
-				mutation.addedNodes.forEach((node) => {
+				mutation.addedNodes.forEach((node: any) => {
 					if (node.classList && node.classList.contains('g-single')) {
 						document.body.classList.add('mq-playing');
 						node.classList.add('z-show');
@@ -1070,10 +1106,11 @@ plugin.onLoad(async (p) => {
 	}).observe(document.body, { attributes: true, attributeFilter: ['class'] });*/
 });
 
-plugin.onConfig((tools) => {
+plugin.onConfig((tools: any) => {
 	return dom("div", {},
-		dom("span", { innerHTML: "打开正在播放界面以调整设置 " , style: { fontSize: "18px" } }),
-		tools.makeBtn("打开", async () => {
+		dom("span", { innerHTML: "打开正在播放界面以调整设置 " , style: { fontSize: ("18px" as any) } }),
+		(tools as any).makeBtn("打开", async () => {
+			// @ts-ignore
 			document.querySelector("a[data-action='max']").click();
 		}),
 		dom("div", { innerHTML: "" , style: { height: "20px" } }),

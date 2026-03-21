@@ -104,6 +104,4 @@ typings/
 .tern-port
 
 # TEMP files
-.tmp/.tmp/
-
 .tmp/

@@ -1,3 +1,4 @@
+import React from "react";
 import './context-menu.scss';
 
 const useEffect = React.useEffect;
@@ -6,13 +7,13 @@ const useCallback = React.useCallback;
 const useState = React.useState;
 const useRef = React.useRef;
 
-function ContextMenu(props) {
+function ContextMenu(props: { isFM?: boolean; src?: string; [key: string]: any; }) {
 	// props:
 	// items: [{html: '', label: '', callback: () => {}}, ...] // label or html is required, if both are provided, html will be used
 	// x: number
 	// y: number
-	const menuRef = useRef(null);
-	const [position, setPosition] = useState({x: props.x ?? 0, y: props.y ?? 0});
+	const menuRef = useRef<any>(null);
+	const [position, setPosition] = useState<any>({x: props.x ?? 0, y: props.y ?? 0});
 
 	useLayoutEffect(() => {
 		const menu = menuRef.current;
@@ -79,7 +80,7 @@ function ContextMenu(props) {
 
 	return ( 
 		<div className="rnp-context-menu" tabIndex={0} ref={menuRef}>
-			{props.items.map((item, index) => (
+			{props.items.map((item: any, index: number) => (
 				item.divider ?
 				<div className="rnp-context-menu-devider" key={index} />
 				:
@@ -102,7 +103,7 @@ function ContextMenu(props) {
 	)
 }
 
-export function showContextMenu(x, y, items) {
+export function showContextMenu(x: number, y: number, items: any) {
 	const div = document.createElement('div');
 	document.body.appendChild(div);
 	ReactDOM.render(<ContextMenu items={items} x={x} y={y} parent={div} />, div);

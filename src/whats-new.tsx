@@ -1,6 +1,7 @@
+import React from "react";
 import './whats-new.scss';
 import changeLog from './whats-new.json';
-import { getPlugin } from './utils.jsx';
+import { getPlugin } from './utils';
 
 import { compareVersions } from 'compare-versions';
 
@@ -9,26 +10,31 @@ const useEffect = React.useEffect;
 const useRef = React.useRef;
 
 
-function WhatsNew(props) {
-	const modelRef = useRef(null);
+function WhatsNew(props: { isFM?: boolean; src?: string; [key: string]: any; }) {
+	const modelRef = useRef<any>(null);
 
 	return (
-		<div class="rnp-whats-new" ref={modelRef}>
-			<div class="rnp-whats-new-title">
+		// @ts-ignore
+		<div className="rnp-whats-new" ref={modelRef}>
+			// @ts-ignore
+			<div className="rnp-whats-new-title">
 				<h2>What's New</h2>
 				<h3>Refined Now Playing</h3>
 			</div>
-			<div class="rnp-whats-new-content">
+			// @ts-ignore
+			<div className="rnp-whats-new-content">
 				{
 					changeLog
-						.filter(version => compareVersions(version.version, props.lastVersion) > 0)
-						.sort((a, b) => compareVersions(b.version, a.version))
-						.map((version) => (
-						<div class="rnp-whats-new-version">
+						.filter((version: any) => compareVersions(version.version, props.lastVersion) > 0)
+						.sort((a: any, b: any) => compareVersions(b.version, a.version))
+						.map((version: any) => (
+						// @ts-ignore
+						<div className="rnp-whats-new-version">
 							<h3>{version.version}</h3>
 							<ul>
 								{
-									version.changes.map((change) => (
+									version.changes.map((change: any) => (
+										// @ts-ignore
 										<li class={`${change[2] ? 'major' : ''}`}>
 											{
 												(() => {
@@ -55,8 +61,10 @@ function WhatsNew(props) {
 					))
 				}
 			</div>
-			<div class="rnp-whats-new-buttons">
-				<button class="rnp-whats-new-button" onClick={() => {
+			// @ts-ignore
+			<div className="rnp-whats-new-buttons">
+				// @ts-ignore
+				<button className="rnp-whats-new-button" onClick={() => {
 					const mask = modelRef.current.parentElement;
 					const model = modelRef.current;
 					model.animate([
@@ -87,7 +95,7 @@ export function whatsNew(force = false) {
 	const currentVersion = getPlugin().manifest.version;
 	if (compareVersions(lastVersion, currentVersion) >= 0 && !force) return;
 	localStorage.setItem("refined-now-playing-last-version", currentVersion);
-	if (changeLog.filter(version => compareVersions(version.version, lastVersion) > 0).length === 0 && !force) return;
+	if (changeLog.filter((version: any) => compareVersions(version.version, lastVersion) > 0).length === 0 && !force) return;
 	const whatsNew = document.createElement("div");
 	whatsNew.id = "refined-now-playing-whats-new";
 	document.body.appendChild(whatsNew);

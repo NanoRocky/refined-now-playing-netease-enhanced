@@ -1,8 +1,9 @@
+import React from "react";
 import './progressbar-preview.scss';
-import { getSetting } from './utils.jsx';
+import { getSetting } from './utils';
 
 const isFMSession = () => {
-	return !document.querySelector(".m-player-fm").classList.contains("f-dn");
+	return !(document as any)!.querySelector(".m-player-fm").classList.contains("f-dn");
 }
 
 if (getSetting('enable-progressbar-preview', true)) {
@@ -15,11 +16,11 @@ const useEffect = React.useEffect;
 const useRef = React.useRef;
 
 
-function useRefState(initialValue) {
-	const [value, setValue] = useState(initialValue);
-	const valueRef = useRef(value);
+function useRefState(initialValue: any) {
+	const [value, setValue] = useState<any>(initialValue);
+	const valueRef = useRef<any>(value);
 
-	const updateValue = (val) => {
+	const updateValue = (val: any) => {
 		valueRef.current = val;
 		setValue(val);
 	};
@@ -28,46 +29,46 @@ function useRefState(initialValue) {
 }
 
 let totalLengthInit = 0;
-legacyNativeCmder.appendRegisterCall('Load', 'audioplayer',  (_, info) => {
+legacyNativeCmder.appendRegisterCall('Load', 'audioplayer',  (_: any, info: any) => {
 	totalLengthInit = info.duration * 1000;
 });
 
-function formatTime(time) {
+function formatTime(time: any) {
 	const h = Math.floor(time / 3600);
 	const m = Math.floor((time - h * 3600) / 60);
 	const s = Math.floor(time - h * 3600 - m * 60);
 	return `${h ? `${h}:` : ''}${m < 10 ? `0${m}` : m}:${s < 10 ? `0${s}` : s}`;
 }
 
-export function ProgressbarPreview(props) {
+export function ProgressbarPreview(props: { isFM?: boolean; src?: string; [key: string]: any; }) {
 	const isCurrentModeSession = () => { // 判断是否在当前模式播放 (普通/FM)
 		return props.isFM ? isFMSession() : !isFMSession();
 	}
 
-	const [visible, setVisible] = useState(false);
+	const [visible, setVisible] = useState<any>(false);
 
-	const xRef = useRef(0), yRef = useRef(0);
+	const xRef = useRef<any>(0), yRef = useRef<any>(0);
 
-	const progressBarRef = useRef(null);
+	const progressBarRef = useRef<any>(null);
 	useEffect(() => {
 		progressBarRef.current = props.dom;
 	}, []);
 
 	const [_lyrics, lyrics, setLyrics] = useRefState(null);
-	const [nonInterludeCount, setNonInterludeCount] = useState(0);
+	const [nonInterludeCount, setNonInterludeCount] = useState<any>(0);
 
-	const hoverPercentRef = useRef(0);
-	const [currentLine, setCurrentLine] = useState(0);
-	const [currentNonInterludeIndex, setCurrentNonInterludeIndex] = useState(0);
-	const [currentTime, setCurrentTime] = useState(0);
+	const hoverPercentRef = useRef<any>(0);
+	const [currentLine, setCurrentLine] = useState<any>(0);
+	const [currentNonInterludeIndex, setCurrentNonInterludeIndex] = useState<any>(0);
+	const [currentTime, setCurrentTime] = useState<any>(0);
 
 	const [_totalLength, totalLength, setTotalLength] = useRefState(totalLengthInit);
 
-	const containerRef = useRef(null);
+	const containerRef = useRef<any>(null);
 
-	const subprogressbarInnerRef = useRef(null);
+	const subprogressbarInnerRef = useRef<any>(null);
 
-	const onLyricsUpdate = (e) => {
+	const onLyricsUpdate = (e: any) => {
 		if (!isCurrentModeSession()) {
 			return;
 		}
@@ -75,7 +76,7 @@ export function ProgressbarPreview(props) {
 			return;
 		}
 		setLyrics(e.detail.lyrics);
-		setNonInterludeCount(e.detail.lyrics.filter(l => l.originalLyric).length);
+		setNonInterludeCount(e.detail.lyrics.filter((l: any) => l.originalLyric).length);
 	}
 	useEffect(() => {
 		if (window.currentLyrics) {
@@ -84,7 +85,7 @@ export function ProgressbarPreview(props) {
 			}
 			const currentLyrics = window.currentLyrics.lyrics;
 			setLyrics(currentLyrics);
-			setNonInterludeCount(currentLyrics.filter(l => l.originalLyric).length);
+			setNonInterludeCount(currentLyrics.filter((l: any) => l.originalLyric).length);
 		}
 		document.addEventListener('lyrics-updated', onLyricsUpdate);
 		return () => {
@@ -93,7 +94,7 @@ export function ProgressbarPreview(props) {
 	}, []);
 
 
-	const onLoad = (_, info) => {
+	const onLoad = (_: any, info: any) => {
 		setTotalLength(info.duration * 1000);
 	}
 	useEffect(() => {
@@ -165,17 +166,17 @@ export function ProgressbarPreview(props) {
 	}, [visible, currentLine]);
 	
 
-	const onMouseEnter = (e) => {
+	const onMouseEnter = (e: any) => {
 		setVisible(true);
 		xRef.current = e.clientX;
 		yRef.current = e.clientY;
 		updateHoverPercent();
 		updatePosition();
 	};
-	const onMouseLeave = (e) => {
+	const onMouseLeave = (e: any) => {
 		setVisible(false);
 	};
-	const onMouseMove = (e) => {
+	const onMouseMove = (e: any) => {
 		xRef.current = e.clientX;
 		yRef.current = e.clientY;
 		updateHoverPercent();
@@ -198,8 +199,9 @@ export function ProgressbarPreview(props) {
 	
 	const isPureMusic = lyrics && (
 		lyrics.length === 1 ||
-		lyrics.length <= 10 && lyrics.some((x) => (x.originalLyric ?? '').includes('纯音乐')) ||
-		document.querySelector('#main-player').getAttribute('data-log')?.includes('"s_ctype":"voice"') ||
+		// @ts-ignore
+		lyrics.length <= 10 && lyrics.some((x: any) => (x.originalLyric ?? '').includes('纯音乐'() as any)) ||
+		(document as any)!.querySelector('#main-player').getAttribute('data-log')?.includes('"s_ctype":"voice"') ||
 		lyrics[0]?.unsynced
 	);
 
@@ -217,12 +219,13 @@ export function ProgressbarPreview(props) {
 				lyrics && lyrics[currentLine]?.dynamicLyric && (
 					<div className="progressbar-preview-line-karaoke">
 						{
-							lyrics[currentLine].dynamicLyric.map((word, i) => {
+							lyrics[currentLine].dynamicLyric.map((word: any, i: number) => {
 								const percent = (currentTime - word.time) / word.duration;
 								return (<span
 									key={i}
 									className={`progressbar-preview-line-karaoke-word ${percent >= 0 && percent <= 1 ? 'current' : ''} ${percent <0 ? 'upcoming' : ''}`}
 									style={{
+										// @ts-ignore
 										'-webkit-mask-position': `${100 * (1 - Math.max(0, Math.min(1, (currentTime - word.time) / word.duration)))}%`,
 									}}
 								>

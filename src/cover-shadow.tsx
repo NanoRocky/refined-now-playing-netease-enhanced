@@ -1,4 +1,5 @@
-import { getSetting } from './utils.jsx';
+import React from "react";
+import { getSetting } from './utils';
 const useState = React.useState;
 const useEffect = React.useEffect;
 
@@ -11,10 +12,10 @@ const getCoverType = () => {
 	}
 };
 
-export function CoverShadow(props) {
-	const [type, setType] = useState(getCoverType()); // black and colorful
-	const [rectangleCover, setRectangleCover] = useState(getSetting('rectangle-cover', true));
-	const [url, setUrl] = useState('');
+export function CoverShadow(props: { isFM?: boolean; src?: string; [key: string]: any; }) {
+	const [type, setType] = useState<any>(getCoverType()); // black and colorful
+	const [rectangleCover, setRectangleCover] = useState<any>(getSetting('rectangle-cover', true));
+	const [url, setUrl] = useState<any>('');
 
 	const image = props.image;
 
@@ -48,7 +49,7 @@ export function CoverShadow(props) {
 	}, []);
 
 	useEffect(() => {
-		document.addEventListener('rnp-cover-shadow-type', (e) => {
+		document.addEventListener('rnp-cover-shadow-type', (e: any) => {
 			setType(e.detail.type ?? 'colorful');
 		});
 	}, []);

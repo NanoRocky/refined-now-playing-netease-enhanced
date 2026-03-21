@@ -1,13 +1,14 @@
+import React from "react";
 import './mini-song-info.scss';
 
 const useState = React.useState;
 const useEffect = React.useEffect;
 const useRef = React.useRef;
 
-export function MiniSongInfo(props) {
-	const [title, setTitle] = useState('');
-	const [artist, setArtist] = useState('');
-	const [album, setAlbum] = useState('');
+export function MiniSongInfo(props: { isFM?: boolean; src?: string; [key: string]: any; }) {
+	const [title, setTitle] = useState<any>('');
+	const [artist, setArtist] = useState<any>('');
+	const [album, setAlbum] = useState<any>('');
 
 	const image = props.image;
 
@@ -33,7 +34,7 @@ export function MiniSongInfo(props) {
 	useEffect(() => {
 		const onObverse = () => {
 			const title = infContainer.querySelector('.title .name').textContent.trim();
-			const artist = Array.from(infContainer.querySelectorAll('.info .playfrom > li:first-child a')).map(a => a.textContent.trim()).join(' / ');
+			const artist = Array.from(infContainer.querySelectorAll('.info .playfrom > li:first-child a')).map((a: any) => a.textContent.trim()).join(' / ');
 			setTitle(title);
 			setArtist(artist);
 		};

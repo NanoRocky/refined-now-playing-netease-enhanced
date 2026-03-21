@@ -210,7 +210,7 @@ export function parseLyric(
 				let target: LyricPureLine | null = null;
 				if (attachMatchingMode === 'equal') {
 					//target = findLast(lyric, (v) => v.time === line.time);
-					target = findLast(lyric, (v) => Math.abs(v.time - line.time) < 20)
+					(target as any) = findLast(lyric, (v) => Math.abs(v.time - line.time) < 20)
 				} else {
 					lyric.forEach((v) => {
 						if (target) {
@@ -240,10 +240,14 @@ export function parseLyric(
 					});
 				}*/
 				if (target) {
+					// @ts-ignore
 					target.originalLyric = target.originalLyric || "";
+					// @ts-ignore
 					if (target.originalLyric.length > 0) {
+						// @ts-ignore
 						target.originalLyric += " ";
 					}
+					// @ts-ignore
 					target.originalLyric += line.lyric;
 				}
 			});
@@ -281,7 +285,7 @@ export function parseLyric(
 				for (let index of sequence) {
 					const v = processed[index];
 					const similarity = calcSimularity(line.originalLyric as string, v.originalLyric as string);
-					const weight = similarity * 1000 + (v[field] ? 1 : 0);
+					const weight = similarity * 1000 + ((v as any)[field] ? 1 : 0);
 					//console.log("similarity", similarity, line.originalLyric, v.originalLyric);
 					//console.log("weight", index, weight, line.originalLyric, v.originalLyric);
 					if (weight < minWeight) {
@@ -304,11 +308,11 @@ export function parseLyric(
 					}
 				}
 
-				target[field] = target[field] || "";
-				if (target[field].length > 0) {
-					target[field] += " ";
+				(target as any)[field] = (target as any)[field] || "";
+				if ((target as any)[field].length > 0) {
+					(target as any)[field] += " ";
 				}
-				target[field] += line.lyric;
+				(target as any)[field] += line.lyric;
 			});
 		}
 

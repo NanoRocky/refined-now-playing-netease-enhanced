@@ -1,5 +1,5 @@
-export const waitForElement = (selector, fun) => {
-	selector = selector.split(',');
+export const waitForElement = (selector_init: string | string[], fun: (element: Element | null) => void): void => {
+	const selector: string[] = typeof selector_init === "string" ? selector_init.split(",") : selector_init;
 	let done = true;
 	for (const s of selector) {
 		if (!document.querySelector(s)) {
@@ -27,13 +27,13 @@ export const waitForElement = (selector, fun) => {
 		}
 	}, 100);
 }
-export const waitForElementAsync = async (selector) => {
+export const waitForElementAsync = async (selector: string): Promise<Element | null> => {
 	if (document.querySelector(selector)) {
 		return document.querySelector(selector);
 	}
 	return await betterncm.utils.waitForElement(selector);
 }
-export const getSetting = (option, defaultValue = '') => {
+export const getSetting = (option: string, defaultValue: any = ''): any => {
 	if (option.endsWith('-fm')) {
 		option = option.replace(/-fm$/, '');
 	}
@@ -43,24 +43,24 @@ export const getSetting = (option, defaultValue = '') => {
 		value = defaultValue;
 	}
 	if (value === 'true') {
-		value = true;
-	} else if (value === 'false') {
-		value = false;
+		(value as any) = true;
+	} else if (value === ('false' as any)) {
+		(value as any) = false;
 	}
 	return value;
 }
-export const setSetting = (option, value) => {
+export const setSetting = (option: string, value: any): void => {
 	option = "refined-now-playing-" + option;
 	localStorage.setItem(option, value);
 }
-export const chunk = (input, size) => {
-	return input.reduce((arr, item, idx) => {
+export const chunk = <T,>(input: T[], size: number): T[][] => {
+	return input.reduce((arr: any, item: any, idx: number) => {
 		return idx % size === 0
 			? [...arr, [item]]
 			: [...arr.slice(0, -1), [...arr.slice(-1)[0], item]];
 	}, []);
 };
-export const copyTextToClipboard = (text) => {
+export const copyTextToClipboard = (text: string): void => {
 	const textarea = document.createElement('textarea');
 	textarea.style.position = 'fixed';
 	textarea.style.top = '0';
@@ -73,10 +73,10 @@ export const copyTextToClipboard = (text) => {
 	document.execCommand('copy', true);
 	document.body.removeChild(textarea);
 }
-export const cyrb53 = (str, seed = 0) => {
+export const cyrb53 = (str: string, seed: number = 0): number => {
 	let h1 = 0xdeadbeef ^ seed,
 		h2 = 0x41c6ce57 ^ seed;
-	for (let i = 0, ch; i < str.length; i++) {
+	for (let i = 0, ch: any; i < str.length; i++) {
 		ch = str.charCodeAt(i);
 		h1 = Math.imul(h1 ^ ch, 2654435761);
 		h2 = Math.imul(h2 ^ ch, 1597334677);
@@ -88,7 +88,7 @@ export const cyrb53 = (str, seed = 0) => {
 	return 4294967296 * (2097151 & h2) + (h1 >>> 0);
 };
 
-export const getPlugin = () => {
+export const getPlugin = (): any => {
 	const name = "RefinedNowPlaying Enhanced";
-	return Object.values(loadedPlugins).find(x => x.manifest.name === name) || loadedPlugins.RefinedNowPlaying || loadedPlugins["refined-now-playing-netease"];
+	return Object.values(loadedPlugins).find((x: any) => x.manifest.name === name) || loadedPlugins.RefinedNowPlaying || loadedPlugins["refined-now-playing-netease"];
 }

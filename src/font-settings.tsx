@@ -15,9 +15,9 @@ import './font-settings.scss';
 const useEffect = React.useEffect;
 const useState = React.useState;
 
-export function FontSettings(props) {
-	const [fontList, setFontList] = useState([]);
-	const [fontFamily, setFontFamily] = useState(JSON.parse(getSetting('font-family', '[]')));
+export function FontSettings(props: { isFM?: boolean; src?: string; [key: string]: any; }) {
+	const [fontList, setFontList] = useState<any>([]);
+	const [fontFamily, setFontFamily] = useState<any>(JSON.parse(getSetting('font-family', '[]')));
 	
 	useEffect(() => {
 		async function getFontList() {
@@ -37,7 +37,7 @@ export function FontSettings(props) {
 			body.rnp-custom-font .g-single-track .lyric *,
 			body.rnp-custom-font .n-single .head *,
 			body.rnp-custom-font .m-fm > *:not(.fmcmt) * {
-				font-family: ${fontFamily.length ? fontFamily.map(font => `'${font}'`).join(', ') : 'inherit'} !important;
+				font-family: ${fontFamily.length ? fontFamily.map((font: any) => `'${font}'`).join(', ') : 'inherit'} !important;
 			}
 		`;
 		setSetting('font-family', JSON.stringify(fontFamily));
@@ -49,16 +49,16 @@ export function FontSettings(props) {
 				<Autocomplete
 					multiple
 					value={fontFamily}
-					onChange={(event, newValue) => {
+					onChange={(event: any, newValue: any) => {
 						setFontFamily(newValue);
 					}}
 					options={fontList}
-					getOptionLabel={(option) => option}
+					getOptionLabel={(option: any) => option}
 					defaultValue={[]}
 					fullWidth
 					freeSolo
 					forcePopupIcon={false}
-					renderInput={(params) => (
+					renderInput={(params: any) => (
 						<TextField
 							{...params}
 							variant="outlined"
@@ -80,8 +80,8 @@ export function FontSettings(props) {
 		</>
 	  );
 }
-function FontPreset(props) {
-	const hasFont = props.fonts.some(font => props.fontList.includes(font));
+function FontPreset(props: { isFM?: boolean; src?: string; [key: string]: any; }) {
+	const hasFont = props.fonts.some((font: any) => props.fontList.includes(font));
 
 	return (
 		<div className="rnp-font-preset">
@@ -93,7 +93,7 @@ function FontPreset(props) {
 			}
 			{
 				!hasFont && (
-					<button className="rnp-download-font-button" onClick={async() => {
+					<button className="rnp-download-font-button" title="下载字体" onClick={async() => {
 						await betterncm.app.exec(props.url);
 					}}>
 						<svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 96 960 960" width="20"><path d="M259.717 895q-40.442 0-69.08-28.787Q162 837.425 162 797v-74h98v74h440v-74h98v74q0 40.425-28.799 69.213Q740.401 895 699.96 895H259.717ZM481 727 249 495l70-68 113 113V203h98v337l113-113 70 68-232 232Z"/></svg>
