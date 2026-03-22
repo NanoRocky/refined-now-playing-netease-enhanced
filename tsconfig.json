@@ -22,6 +22,9 @@
         "strict": true, "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
         "strictNullChecks": true,
-        "allowJs": false
+        "allowJs": false,
+        "noEmit": true,
+        "isolatedModules": true,
+        "useDefineForClassFields": true
     }
 }
