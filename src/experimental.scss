@@ -1,104 +1,97 @@
 /* experimental */
 body.rnp-fluid-max-framerate-5 {
-	.rnp-background-fluid .rnp-background-fluid-rect {
-		animation-timing-function: steps(750);
+  .rnp-background-fluid .rnp-background-fluid-rect {
+    animation-timing-function: steps(750);
 
-		canvas {
-			animation-timing-function: steps(300);
-		}
-	}
+    canvas {
+      animation-timing-function: steps(300);
+    }
+  }
 }
 
 body.rnp-fluid-max-framerate-10 {
-	.rnp-background-fluid .rnp-background-fluid-rect {
-		animation-timing-function: steps(1500);
+  .rnp-background-fluid .rnp-background-fluid-rect {
+    animation-timing-function: steps(1500);
 
-		canvas {
-			animation-timing-function: steps(600);
-		}
-	}
+    canvas {
+      animation-timing-function: steps(600);
+    }
+  }
 }
 
 body.rnp-fluid-max-framerate-30 {
-	.rnp-background-fluid .rnp-background-fluid-rect {
-		animation-timing-function: steps(4500);
+  .rnp-background-fluid .rnp-background-fluid-rect {
+    animation-timing-function: steps(4500);
 
-		canvas {
-			animation-timing-function: steps(1800);
-		}
-	}
+    canvas {
+      animation-timing-function: steps(1800);
+    }
+  }
 }
 
 body.rnp-fluid-max-framerate-60 {
-	.rnp-background-fluid .rnp-background-fluid-rect {
-		animation-timing-function: steps(9000);
+  .rnp-background-fluid .rnp-background-fluid-rect {
+    animation-timing-function: steps(9000);
 
-		canvas {
-			animation-timing-function: steps(3600);
-		}
-	}
+    canvas {
+      animation-timing-function: steps(3600);
+    }
+  }
 }
-
-
 
 .rnp-background-fluid {
-	&::after {
-		-webkit-backdrop-filter: blur(var(--fluid-blur, 64px)) !important;
-		backdrop-filter: blur(var(--fluid-blur, 64px)) !important;
-	}
+  &::after {
+    -webkit-backdrop-filter: blur(var(--fluid-blur, 64px)) !important;
+    backdrop-filter: blur(var(--fluid-blur, 64px)) !important;
+  }
 }
-
-
 
 body:not(.always-show-bottombar).mq-playing.hide-entire-bottombar-when-idle {
-	.m-pinfo {
-		transition: opacity 0.3s ease;
-	}
+  .m-pinfo {
+    transition: opacity 0.3s ease;
+  }
 
-	&.rnp-idle {
-
-		.m-pinfo,
-		#main-player {
-			opacity: 0 !important;
-		}
-	}
+  &.rnp-idle {
+    .m-pinfo,
+    #main-player {
+      opacity: 0 !important;
+    }
+  }
 }
 
-
-
 body.presentation-mode {
-	--bottombar-height: 20px !important;
+  --bottombar-height: 20px !important;
 
-	.m-pinfo,
-	#main-player,
-	header.g-hd,
-	.m-winctrl {
-		display: none;
-	}
+  .m-pinfo,
+  #main-player,
+  header.g-hd,
+  .m-winctrl {
+    display: none;
+  }
 
-	.rnp-full-screen-button {
-		left: 25px;
-	}
+  .rnp-full-screen-button {
+    left: 25px;
+  }
 
-	.g-single a {
-		pointer-events: none !important;
-	}
+  .g-single a {
+    pointer-events: none !important;
+  }
 
-	// hide comments
-	.g-single-track .g-bd2,
-	.g-singlec .g-bd2 {
-		display: none;
-	}
+  // hide comments
+  .g-single-track .g-bd2,
+  .g-singlec .g-bd2 {
+    display: none;
+  }
 
-	.g-singlec-ct {
-		overflow-y: hidden;
-	}
+  .g-singlec-ct {
+    overflow-y: hidden;
+  }
 
-	.g-bd2 {
-		display: none;
-	}
+  .g-bd2 {
+    display: none;
+  }
 
-	.m-fm .fmcmt {
-		display: none;
-	}
+  .m-fm .fmcmt {
+    display: none;
+  }
 }

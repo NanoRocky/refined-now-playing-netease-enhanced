@@ -1,10 +1,10 @@
-declare module '*.html?raw' {
-    const content: string;
-    export default content;
+declare module "*.html?raw" {
+  const content: string;
+  export default content;
 }
-declare module '*.scss' {
-    const content: any;
-    export default content;
+declare module "*.scss" {
+  const content: any;
+  export default content;
 }
 
 declare let dom: any;
@@ -18,15 +18,14 @@ declare let plugin: any;
 declare let getMenu: any;
 
 interface Window {
-    [key: string]: any;
+  [key: string]: any;
 }
 
 declare let registerAudioLevelCallback: any;
 declare let unregisterAudioLevelCallback: any;
 declare let betterncm_native: any;
 declare let channel: any;
-declare module 'react-dom/client';
-
+declare module "react-dom/client";
 
 declare let legacyNativeCmder: any;
 declare let ReactDOM: any;

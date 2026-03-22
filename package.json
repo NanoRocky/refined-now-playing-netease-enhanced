@@ -1,12 +1,15 @@
 {
-  "version": "0.1.1",
-  "description": "RefinedNowPlaying Enhanced",
   "name": "refined-now-playing-netease-enhanced",
+  "version": "0.2.1",
+  "description": "RefinedNowPlaying Enhanced",
   "scripts": {
-    "build": "vite build",
-    "build:dev": "vite build --mode development",
+    "build": "vue-tsc --noEmit && vite build",
+    "build:dev": "vue-tsc --noEmit && vite build --mode development",
     "watch": "vite build --watch",
     "serve": "vite",
+    "format": "prettier --write ./src/",
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts,.vue --fix",
+    "type-check": "vue-tsc --noEmit",
     "package-update": "npm-check-updates -u && pnpm update --latest --save"
   },
   "dependencies": {
@@ -32,10 +35,13 @@
     "npm-check-updates": "^19.6.5",
     "postcss": "^8.5.8",
     "prettier": "^3.8.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
     "sass": "^1.98.0",
     "terser": "^5.46.1",
     "typescript": "^5.9.3",
     "vite": "^8.0.1",
+    "vue-tsc": "^3.2.6",
     "vite-plugin-css-injected-by-js": "^4.0.1"
   }
 }
