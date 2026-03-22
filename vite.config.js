@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
     return {
         plugins: [
             react({
-                jsxRuntime: 'automatic'
+                jsxRuntime: 'classic',
             }),
             cssInjectedByJsPlugin(),
         ],
