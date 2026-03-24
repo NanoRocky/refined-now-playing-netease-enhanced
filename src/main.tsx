@@ -35,7 +35,11 @@ import { ProgressbarPreview } from "./progressbar-preview";
 import { FontSettings } from "./font-settings";
 import "./material-you-compatibility.scss";
 
-const updateAccentColor = (name: any, argb: any, isFM = false) => {
+const updateAccentColor = (
+  name: string,
+  argb: number,
+  isFM: boolean = false,
+) => {
   const [r, g, b] = [...argb2Rgb(argb)];
   if (isFM) {
     document.body.style.setProperty(`--${name}-fm`, `rgb(${r}, ${g}, ${b})`);
@@ -46,7 +50,7 @@ const updateAccentColor = (name: any, argb: any, isFM = false) => {
   document.body.style.setProperty(`--${name}-rgb`, `${r}, ${g}, ${b}`);
 };
 
-const useGreyAccentColor = (isFM = false) => {
+const useGreyAccentColor = (isFM: boolean = false) => {
   updateAccentColor("rnp-accent-color-dark", rgb2Argb(150, 150, 150), isFM);
   updateAccentColor(
     "rnp-accent-color-on-primary-dark",
@@ -84,9 +88,9 @@ const useGreyAccentColor = (isFM = false) => {
   updateAccentColor("rnp-accent-color-bg-light", rgb2Argb(190, 190, 190), isFM);
 };
 
-let lastDom: any = null,
+let lastDom: Node | null = null,
   lastIsFM = false;
-const calcAccentColor = (dom: HTMLElement | any, isFM = false) => {
+const calcAccentColor = (dom: HTMLElement | any, isFM: boolean = false) => {
   lastDom = dom.cloneNode(true);
   lastIsFM = isFM;
 
@@ -96,8 +100,8 @@ const calcAccentColor = (dom: HTMLElement | any, isFM = false) => {
   const ctx = canvas.getContext("2d");
   ctx!.drawImage(dom, 0, 0, dom.naturalWidth, dom.naturalHeight, 0, 0, 50, 50);
   // @ts-ignore
-  const pixels = chunk(ctx!.getImageData(0, 0, 50, 50).data, 4).map(
-    (pixel: any) => {
+  const pixels = chunk<number>(ctx!.getImageData(0, 0, 50, 50).data, 4).map(
+    (pixel: number[]) => {
       return (
         (((pixel[3] << 24) >>> 0) |
           ((pixel[0] << 16) >>> 0) |
@@ -109,7 +113,7 @@ const calcAccentColor = (dom: HTMLElement | any, isFM = false) => {
   );
   const quantizedColors = QuantizerCelebi.quantize(pixels, 128);
   const sortedQuantizedColors = Array.from(quantizedColors).sort(
-    (a: any, b: any) => b[1] - a[1],
+    (a, b) => b[1] - a[1],
   );
 
   /*Array.from(quantizedColors).sort((a, b) => b[1] - a[1]).slice(0, 50).map((x) => {
@@ -117,10 +121,8 @@ const calcAccentColor = (dom: HTMLElement | any, isFM = false) => {
 	});*/
   const mostFrequentColors = sortedQuantizedColors
     .slice(0, 5)
-    .map((x: any) => argb2Rgb(x[0]));
-  if (
-    mostFrequentColors.every((x: any) => Math.max(...x) - Math.min(...x) < 5)
-  ) {
+    .map((x) => argb2Rgb(x[0]));
+  if (mostFrequentColors.every((x) => Math.max(...x) - Math.min(...x) < 5)) {
     useGreyAccentColor();
     return;
   }
@@ -134,14 +136,14 @@ const calcAccentColor = (dom: HTMLElement | any, isFM = false) => {
   // theme.schemes.light.bgDarken = (Hct.from(theme.palettes.neutral.hue, theme.palettes.neutral.chroma, 97.5)).toInt();
   updateAccentColor(
     "rnp-accent-color-dark",
-    (theme as any).schemes.dark[variant],
+    (theme.schemes.dark as any)[variant],
     isFM,
   );
   updateAccentColor(
     "rnp-accent-color-on-primary-dark",
     Hct.from(
       (theme.palettes as any)[variant].hue,
-      (theme as any).palettes[variant].chroma,
+      (theme.palettes as any)[variant].chroma,
       20,
     ).toInt(),
     isFM,
@@ -150,7 +152,7 @@ const calcAccentColor = (dom: HTMLElement | any, isFM = false) => {
   updateAccentColor(
     "rnp-accent-color-shade-1-dark",
     Hct.from(
-      ((theme as any).palettes as any)[variant].hue,
+      (theme.palettes as any)[variant].hue,
       (theme.palettes as any)[variant].chroma,
       80,
     ).toInt(),
@@ -160,7 +162,7 @@ const calcAccentColor = (dom: HTMLElement | any, isFM = false) => {
   updateAccentColor(
     "rnp-accent-color-shade-2-dark",
     Hct.from(
-      (theme as any as any).palettes[variant].hue,
+      (theme.palettes as any)[variant].hue,
       (theme.palettes as any)[variant].chroma,
       90,
     ).toInt(),
@@ -184,13 +186,11 @@ const calcAccentColor = (dom: HTMLElement | any, isFM = false) => {
   // @ts-ignore
   updateAccentColor(
     "rnp-accent-color-on-primary-light",
-    (Hct as any)
-      .from(
-        (theme as any).palettes[variant].hue,
-        (theme.palettes as any)[variant].chroma,
-        100,
-      )
-      .toInt(),
+    Hct.from(
+      (theme.palettes as any)[variant].hue,
+      (theme.palettes as any)[variant].chroma,
+      100,
+    ).toInt(),
     isFM,
   );
   // @ts-ignore
@@ -245,7 +245,7 @@ const updateCDImage = () => {
   const realCD = document.querySelector(".n-single .cdimg");
 
   const update = () => {
-    const cdImage = (imgDom as any).src;
+    const cdImage = (imgDom as HTMLImageElement).src;
     if (cdImage === lastCDImage) {
       return;
     }
@@ -253,11 +253,11 @@ const updateCDImage = () => {
     calcAccentColor(imgDom);
   };
 
-  if ((imgDom as any).complete) {
+  if ((imgDom as HTMLImageElement).complete) {
     update();
     realCD!.classList.remove("loading");
   } else {
-    (realCD as any).classList.add("loading");
+    (realCD as HTMLImageElement).classList.add("loading");
   }
 };
 
@@ -272,11 +272,11 @@ const recalculateTitleSize = (forceRefresh = false) => {
   if (!title) {
     return;
   }
-  if ((title as any).innerText === lastTitle && !forceRefresh) {
+  if ((title as HTMLElement).innerText === lastTitle && !forceRefresh) {
     return;
   }
   // @ts-ignore
-  (lastTitle as any) = title.innerText;
+  (lastTitle as HTMLElement) = title.innerText;
   // @ts-ignore
   const text = title.innerText;
   const testDiv = document.createElement("div");
@@ -294,9 +294,9 @@ const recalculateTitleSize = (forceRefresh = false) => {
     45,
   );
   const minThreshold = 24;
-  const targetWidth = (document as any).querySelector(
+  const targetWidth = document.querySelector(
     ".g-single-track .g-singlec-ct .n-single .mn .head .inf .title",
-  ).clientWidth;
+  )!.clientWidth;
 
   if (targetWidth == 0) {
     return;
@@ -350,7 +350,7 @@ const moveTags = () => {
   }
   const existingTags = titleBase.querySelector("h1 > .tag-wrap");
   if (existingTags) {
-    (existingTags as any).remove();
+    existingTags.remove();
   }
   // @ts-ignore
   titleBase.querySelector("h1").appendChild(tags);
@@ -388,16 +388,19 @@ const calcTitleScroll = () => {
 	titleContainer.style.setProperty('--scroll-speed', `${(innerWidth - containerWidth) / 30}s`);*/
 };
 
-waitForElement("#main-player, .m-pinfo", (dom: HTMLElement | any) => {
-  dom.addEventListener("mouseenter", () => {
+waitForElement("#main-player, .m-pinfo", (dom: Element | null) => {
+  dom!.addEventListener("mouseenter", () => {
     document.body.classList.add("bottombar-hover");
   });
-  dom.addEventListener("mouseleave", () => {
+  dom!.addEventListener("mouseleave", () => {
     document.body.classList.remove("bottombar-hover");
   });
 });
 
-const addOrRemoveGlobalClassByOption = (className: any, optionValue: any) => {
+const addOrRemoveGlobalClassByOption = (
+  className: string,
+  optionValue: boolean,
+) => {
   if (optionValue) {
     document.body.classList.add(className);
   } else {
@@ -413,29 +416,32 @@ const addSettingsMenu = async (isFM = false) => {
     return;
   }
 
-  const sliderEnhance = (slider: any) => {
+  const sliderEnhance = (slider: HTMLInputElement) => {
     const isMidSlider = slider.classList.contains("mid-slider");
-    slider.addEventListener("input", (e: any) => {
-      const value = e.target.value;
-      const min = e.target.min;
-      const max = e.target.max;
+    slider.addEventListener("input", (ev: Event) => {
+      const e = ev as Event & { target: HTMLInputElement };
+      const value = parseFloat(e.target.value);
+      const min = parseFloat(e.target.min);
+      const max = parseFloat(e.target.max);
       const percent = (value - min) / (max - min);
       let bg = `linear-gradient(90deg, var(--rnp-accent-color) ${percent * 100}%, #dfe1e422 ${percent * 100}%)`;
       if (!isMidSlider) e.target.style.background = bg;
 
-      if (value !== e.target.getAttribute("default")) {
-        e.target.parentElement.classList.add("changed");
+      if (value !== parseFloat(e.target.getAttribute("default")!)) {
+        e.target.parentElement!.classList.add("changed");
       } else {
-        e.target.parentElement.classList.remove("changed");
+        e.target.parentElement!.classList.remove("changed");
       }
     });
-    if (slider.parentElement.querySelector(".rnp-slider-reset")) {
-      slider.parentElement
-        .querySelector(".rnp-slider-reset")
-        .addEventListener("click", (e: any) => {
-          const slider =
-            e.target.parentElement.parentElement.querySelector(".rnp-slider");
-          slider.value = slider.getAttribute("default");
+    if (slider.parentElement!.querySelector(".rnp-slider-reset")) {
+      slider
+        .parentElement!.querySelector(".rnp-slider-reset")!
+        .addEventListener("click", (ev) => {
+          const e = ev as Event & { target: HTMLInputElement };
+          const slider = e.target.parentElement!.parentElement!.querySelector(
+            ".rnp-slider",
+          )! as HTMLInputElement;
+          slider.value = slider.getAttribute("default")!;
           slider.dispatchEvent(new Event("input"));
           slider.dispatchEvent(new Event("change"));
         });
@@ -443,16 +449,19 @@ const addSettingsMenu = async (isFM = false) => {
     slider.dispatchEvent(new Event("input"));
   };
   const bindCheckboxToClass = (
-    checkbox: any,
-    className: any,
-    defaultValue = false,
-    callback: Function = () => {},
+    checkbox: HTMLInputElement,
+    className: string,
+    defaultValue: boolean = false,
+    callback: (b: boolean) => void = () => {},
   ) => {
     checkbox.checked = getSetting(checkbox.id, defaultValue);
-    checkbox.addEventListener("change", (e: any) => {
+    checkbox.addEventListener("change", (e) => {
       shouldSettingMenuReload[isFM ? 1 : 0] = true;
-      setSetting(checkbox.id, e.target.checked);
-      addOrRemoveGlobalClassByOption(className, e.target.checked);
+      setSetting(checkbox.id, (e.target as HTMLInputElement).checked);
+      addOrRemoveGlobalClassByOption(
+        className,
+        (e.target as HTMLInputElement).checked,
+      );
       // @ts-ignore
       callback(e.target.checked);
     });
@@ -461,8 +470,8 @@ const addSettingsMenu = async (isFM = false) => {
     callback(checkbox.checked);
   };
   const bindCheckboxToFunction = (
-    checkbox: any,
-    func: any,
+    checkbox: HTMLInputElement,
+    func: (b: boolean) => void,
     defaultValue = false,
   ) => {
     checkbox.checked = getSetting(checkbox.id, defaultValue);
@@ -474,30 +483,32 @@ const addSettingsMenu = async (isFM = false) => {
     func(checkbox.checked);
   };
   const bindSliderToCSSVariable = (
-    slider: any,
-    variable: any,
+    slider: HTMLInputElement,
+    variable: string,
     defaultValue = 0,
     event = "input",
-    mapping = (x: any) => {
+    mapping = (x: string) => {
       return x;
     },
     addClassWhenAdjusting = "",
   ) => {
     slider.value = getSetting(slider.id, defaultValue);
     slider.dispatchEvent(new Event("input"));
-    slider.addEventListener(event, (e: any) => {
+    slider.addEventListener(event, (ev) => {
+      const e = ev as Event & { target: HTMLInputElement };
       const value = e.target.value;
       document.body.style.setProperty(variable, mapping(value));
     });
-    slider.addEventListener("change", (e: any) => {
+    slider.addEventListener("change", (ev) => {
       shouldSettingMenuReload[isFM ? 1 : 0] = true;
+      const e = ev as Event & { target: HTMLInputElement };
       setSetting(slider.id, e.target.value);
     });
     if (addClassWhenAdjusting) {
-      slider.addEventListener("mousedown", (e: any) => {
+      slider.addEventListener("mousedown", (e) => {
         document.body.classList.add(addClassWhenAdjusting);
       });
-      slider.addEventListener("mouseup", (e: any) => {
+      slider.addEventListener("mouseup", (e) => {
         document.body.classList.remove(addClassWhenAdjusting);
       });
     }
@@ -505,30 +516,32 @@ const addSettingsMenu = async (isFM = false) => {
     sliderEnhance(slider);
   };
   const bindSliderToFunction = (
-    slider: any,
-    func: any,
+    slider: HTMLInputElement,
+    func: (x: string) => void,
     defaultValue = 0,
     event = "input",
-    mapping = (x: any) => {
+    mapping = (x: string) => {
       return x;
     },
     addClassWhenAdjusting = "",
   ) => {
     slider.value = getSetting(slider.id, defaultValue);
     slider.dispatchEvent(new Event("input"));
-    slider.addEventListener(event, (e: any) => {
+    slider.addEventListener(event, (ev) => {
+      const e = ev as Event & { target: HTMLInputElement };
       const value = e.target.value;
       func(mapping(value));
     });
-    slider.addEventListener("change", (e: any) => {
+    slider.addEventListener("change", (ev) => {
       shouldSettingMenuReload[isFM ? 1 : 0] = true;
+      const e = ev as Event & { target: HTMLInputElement };
       setSetting(slider.id, e.target.value);
     });
     if (addClassWhenAdjusting) {
-      slider.addEventListener("mousedown", (e: any) => {
+      slider.addEventListener("mousedown", (e) => {
         document.body.classList.add(addClassWhenAdjusting);
       });
-      slider.addEventListener("mouseup", (e: any) => {
+      slider.addEventListener("mouseup", (e) => {
         document.body.classList.remove(addClassWhenAdjusting);
       });
     }
@@ -536,41 +549,45 @@ const addSettingsMenu = async (isFM = false) => {
     sliderEnhance(slider);
   };
   const bindSelectGroupToClasses = (
-    selectGroup: any,
+    selectGroup: Element,
     defaultValue: any,
-    mapping = (x: any) => {
+    mapping = (x: string) => {
       return x;
     },
-    callback = (x: any) => {},
+    callback = (x: string) => {},
   ) => {
     const buttons = selectGroup.querySelectorAll(".rnp-select-group-btn");
-    buttons.forEach((button: any) => {
-      button.addEventListener("click", (e: any) => {
+    buttons.forEach((button) => {
+      button.addEventListener("click", (ev) => {
+        const e = ev as Event & { target: HTMLButtonElement };
         const value = e.target.getAttribute("value");
-        buttons.forEach((button: any) => {
+        buttons.forEach((button) => {
           button.classList.remove("selected");
-          document.body.classList.remove(mapping(button.getAttribute("value")));
+          const e = ev as Event & { target: HTMLButtonElement };
+          document.body.classList.remove(
+            mapping(button.getAttribute("value")!),
+          );
         });
         e.target.classList.add("selected");
-        document.body.classList.add(mapping(value));
+        document.body.classList.add(mapping(value!));
         shouldSettingMenuReload[isFM ? 1 : 0] = true;
         setSetting(selectGroup.id, value);
-        callback(value);
+        callback(value!);
       });
     });
     const value = getSetting(selectGroup.id, defaultValue);
-    buttons.forEach((button: any) => {
+    buttons.forEach((button) => {
       if (button.getAttribute("value") === value) {
         button.classList.add("selected");
         document.body.classList.add(mapping(value));
       } else {
         button.classList.remove("selected");
-        document.body.classList.remove(mapping(button.getAttribute("value")));
+        document.body.classList.remove(mapping(button.getAttribute("value")!));
       }
     });
     callback(value);
   };
-  const getOptionDom = (selector: any) => {
+  const getOptionDom = (selector: string): Element | null => {
     if (isFM) return document.querySelector(`${selector}-fm`);
     return document.querySelector(selector);
   };
@@ -582,8 +599,8 @@ const addSettingsMenu = async (isFM = false) => {
     const autoHideMiniSongInfo = getOptionDom("#auto-hide-mini-song-info");
     const colorScheme = getOptionDom("#color-scheme");
     const accentColorVariant = getOptionDom("#accent-color-variant");
-    const textShadow = getOptionDom("#text-shadow");
-    const textGlow = getOptionDom("#text-glow");
+    const textShadow = getOptionDom("#text-shadow") as HTMLInputElement;
+    const textGlow = getOptionDom("#text-glow") as HTMLInputElement;
     const refinedControlBar = getOptionDom("#refined-control-bar");
     const alwaysShowBottomBar = getOptionDom("#always-show-bottombar");
     const bottomProgressBar = getOptionDom("#bottom-progressbar");
@@ -591,22 +608,30 @@ const addSettingsMenu = async (isFM = false) => {
       "#enable-progressbar-preview",
     );
     bindSelectGroupToClasses(
-      exclusiveModes,
+      exclusiveModes!,
       "none",
-      (x: any) => (x === "all" ? "no-exclusive-mode" : x),
+      (x) => (x === "all" ? "no-exclusive-mode" : x),
       () => {
         window.dispatchEvent(new Event("recalc-lyrics"));
         recalculateTitleSize();
       },
     );
-    bindCheckboxToClass(centerLyric, "center-lyric", false);
-    bindCheckboxToClass(autoHideMiniSongInfo, "auto-hide-mini-song-info", true);
-    bindSelectGroupToClasses(colorScheme, "auto", (x: any) => `rnp-${x}`);
+    bindCheckboxToClass(
+      centerLyric! as HTMLInputElement,
+      "center-lyric",
+      false,
+    );
+    bindCheckboxToClass(
+      autoHideMiniSongInfo! as HTMLInputElement,
+      "auto-hide-mini-song-info",
+      true,
+    );
+    bindSelectGroupToClasses(colorScheme!, "auto", (x) => `rnp-${x}`);
     bindSelectGroupToClasses(
-      accentColorVariant,
+      accentColorVariant!,
       "primary",
-      (x: any) => `accent-color-${x}`,
-      (x: any) => {
+      (x) => `accent-color-${x}`,
+      (x) => {
         if (x == "off") document.body.classList.remove("enable-accent-color");
         else document.body.classList.add("enable-accent-color");
         window.accentColorVariant = x == "off" ? "primary" : x;
@@ -614,24 +639,36 @@ const addSettingsMenu = async (isFM = false) => {
       },
     );
     // @ts-ignore
-    bindCheckboxToClass(textShadow, "rnp-shadow", false, (x: any) => {
+    bindCheckboxToClass(textShadow, "rnp-shadow", false, (x) => {
       if (x) {
         textGlow.checked = false;
         textGlow.dispatchEvent(new Event("change"));
       }
     });
     // @ts-ignore
-    bindCheckboxToClass(textGlow, "rnp-text-glow", false, (x: any) => {
+    bindCheckboxToClass(textGlow, "rnp-text-glow", false, (x) => {
       if (x) {
         textShadow.checked = false;
         textShadow.dispatchEvent(new Event("change"));
       }
     });
-    bindCheckboxToClass(refinedControlBar, "refined-control-bar", true);
-    bindCheckboxToClass(alwaysShowBottomBar, "always-show-bottombar", false);
-    bindCheckboxToClass(bottomProgressBar, "rnp-bottom-progressbar", false);
     bindCheckboxToClass(
-      enableProgressbarPreview,
+      refinedControlBar! as HTMLInputElement,
+      "refined-control-bar",
+      true,
+    );
+    bindCheckboxToClass(
+      alwaysShowBottomBar! as HTMLInputElement,
+      "always-show-bottombar",
+      false,
+    );
+    bindCheckboxToClass(
+      bottomProgressBar! as HTMLInputElement,
+      "rnp-bottom-progressbar",
+      false,
+    );
+    bindCheckboxToClass(
+      enableProgressbarPreview! as HTMLInputElement,
       "enable-progressbar-preview",
       true,
     );
@@ -643,9 +680,9 @@ const addSettingsMenu = async (isFM = false) => {
     const albumSize = getOptionDom("#album-size");
     const coverBlurryShadow = getOptionDom("#cover-blurry-shadow");
     bindSelectGroupToClasses(
-      horizontalAlign,
+      horizontalAlign!,
       "left",
-      (x: any) => {
+      (x) => {
         return `horizontal-align-${x}`;
       },
       () => {
@@ -653,21 +690,25 @@ const addSettingsMenu = async (isFM = false) => {
       },
     );
     bindSelectGroupToClasses(
-      verticalAlign,
+      verticalAlign!,
       "bottom",
-      (x: any) => {
+      (x) => {
         return `vertical-align-${x}`;
       },
-      () => {
+      (a) => {
         recalculateTitleSize();
       },
     );
-    bindCheckboxToClass(rectangleCover, "rectangle-cover", true);
+    bindCheckboxToClass(
+      rectangleCover! as HTMLInputElement,
+      "rectangle-cover",
+      true,
+    );
     bindSliderToFunction(
-      albumSize,
-      (x: any) => {
+      albumSize! as HTMLInputElement,
+      (x) => {
         window.albumSize = x;
-        const img = getOptionDom(".n-single .cdimg img"); // ?? getOptionDom('.m-fm .fmplay .covers .cvr.j-curr');
+        const img = getOptionDom(".n-single .cdimg img") as HTMLImageElement; // ?? getOptionDom('.m-fm .fmplay .covers .cvr.j-curr');
         if (!img?.src) return;
         const currentSrc = img.src;
         const newSrc = currentSrc.replace(
@@ -680,16 +721,17 @@ const addSettingsMenu = async (isFM = false) => {
       },
       200,
       "change",
-      (x: any) => {
-        return x === 200 ? 210 : x;
+      (x) => {
+        const y = parseInt(x);
+        return String(y === 200 ? 210 : y);
       },
     );
     // @ts-ignore
     bindCheckboxToClass(
-      coverBlurryShadow,
+      coverBlurryShadow! as HTMLInputElement,
       "cover-blurry-shadow",
       true,
-      (x: any) => {
+      (x) => {
         document.dispatchEvent(
           new CustomEvent("rnp-cover-shadow-type", {
             detail: { type: x ? "colorful" : "black" },
@@ -710,69 +752,85 @@ const addSettingsMenu = async (isFM = false) => {
     const gradientBgDynamic = getOptionDom("#gradient-bg-dynamic");
     const staticFluid = getOptionDom("#static-fluid");
     bindSelectGroupToClasses(
-      backgroundType,
+      backgroundType!,
       "blur",
-      (x: any) => `rnp-bg-${x}`,
-      (x: any) => {
+      (x) => `rnp-bg-${x}`,
+      (x) => {
         document.dispatchEvent(
           new CustomEvent("rnp-background-type", { detail: { type: x } }),
         );
       },
     );
-    bindSliderToCSSVariable(bgBlur, "--bg-blur", 90, "change", (x: any) => {
-      return `${x}px`;
-    });
-    bindSliderToCSSVariable(bgDim, "--bg-dim", 55, "change", (x: any) => {
-      return x / 100;
-    });
     bindSliderToCSSVariable(
-      bgDimForGradientBg,
-      "--bg-dim-for-gradient-bg",
-      45,
+      bgBlur! as HTMLInputElement,
+      "--bg-blur",
+      90,
       "change",
-      (x: any) => {
-        return x / 100;
-      },
-    );
-    bindSliderToCSSVariable(
-      bgDimForFluidBg,
-      "--bg-dim-for-fluid-bg",
-      30,
-      "change",
-      (x: any) => {
-        return x / 100;
-      },
-    );
-    bindSliderToCSSVariable(
-      bgBlurForNoneBgMask,
-      "--bg-blur-for-none-bg-mask",
-      0,
-      "change",
-      (x: any) => {
+      (x) => {
         return `${x}px`;
       },
     );
     bindSliderToCSSVariable(
-      bgDimForNoneBgMask,
-      "--bg-dim-for-none-bg-mask",
-      0,
+      bgDim! as HTMLInputElement,
+      "--bg-dim",
+      55,
       "change",
-      (x: any) => {
-        return x / 100;
+      (x) => {
+        return String(parseFloat(x) / 100);
       },
     );
     bindSliderToCSSVariable(
-      bgOpacity,
+      bgDimForGradientBg! as HTMLInputElement,
+      "--bg-dim-for-gradient-bg",
+      45,
+      "change",
+      (x) => {
+        return String(parseFloat(x) / 100);
+      },
+    );
+    bindSliderToCSSVariable(
+      bgDimForFluidBg! as HTMLInputElement,
+      "--bg-dim-for-fluid-bg",
+      30,
+      "change",
+      (x) => {
+        return String(parseFloat(x) / 100);
+      },
+    );
+    bindSliderToCSSVariable(
+      bgBlurForNoneBgMask! as HTMLInputElement,
+      "--bg-blur-for-none-bg-mask",
+      0,
+      "change",
+      (x) => {
+        return `${x}px`;
+      },
+    );
+    bindSliderToCSSVariable(
+      bgDimForNoneBgMask! as HTMLInputElement,
+      "--bg-dim-for-none-bg-mask",
+      0,
+      "change",
+      (x) => {
+        return String(parseFloat(x) / 100);
+      },
+    );
+    bindSliderToCSSVariable(
+      bgOpacity! as HTMLInputElement,
       "--bg-opacity",
       0,
       "change",
-      (x: any) => {
-        return 1 - x / 100;
+      (x) => {
+        return String(1 - parseFloat(x) / 100);
       },
     );
-    bindCheckboxToClass(gradientBgDynamic, "gradient-bg-dynamic", true);
+    bindCheckboxToClass(
+      gradientBgDynamic! as HTMLInputElement,
+      "gradient-bg-dynamic",
+      true,
+    );
     // @ts-ignore
-    bindCheckboxToClass(staticFluid, "static-fluid", false, (x: any) => {
+    bindCheckboxToClass(staticFluid, "static-fluid", false, (x) => {
       document.dispatchEvent(
         new CustomEvent("rnp-static-fluid", { detail: x }),
       );
@@ -801,13 +859,20 @@ const addSettingsMenu = async (isFM = false) => {
       "#lyric-contributors-display",
     );
 
-    bindCheckboxToClass(enableAMLL, "enable-amll", true);
-    bindCheckboxToClass(amllFastSource, "amll-fast-source", false);
-    bindCheckboxToClass(originalLyricBold, "original-lyric-bold", true);
-
+    bindCheckboxToClass(enableAMLL! as HTMLInputElement, "enable-amll", true);
+    bindCheckboxToClass(
+      amllFastSource! as HTMLInputElement,
+      "amll-fast-source",
+      false,
+    );
+    bindCheckboxToClass(
+      originalLyricBold! as HTMLInputElement,
+      "original-lyric-bold",
+      true,
+    );
     bindSliderToFunction(
-      lyricFontSize,
-      (x: any) => {
+      lyricFontSize! as HTMLInputElement,
+      (x) => {
         document.dispatchEvent(
           new CustomEvent("rnp-lyric-font-size", { detail: x }),
         );
@@ -816,8 +881,8 @@ const addSettingsMenu = async (isFM = false) => {
       "change",
     );
     bindSliderToFunction(
-      lyricRomajiSizeEm,
-      (x: any) => {
+      lyricRomajiSizeEm! as HTMLInputElement,
+      (x) => {
         document.body.style.setProperty("--lyric-romaji-size-em", `${x}em`);
         window.dispatchEvent(new Event("recalc-lyrics"));
       },
@@ -825,8 +890,8 @@ const addSettingsMenu = async (isFM = false) => {
       "change",
     );
     bindSliderToFunction(
-      lyricTranslationSizeEm,
-      (x: any) => {
+      lyricTranslationSizeEm! as HTMLInputElement,
+      (x) => {
         document.body.style.setProperty(
           "--lyric-translation-size-em",
           `${x}em`,
@@ -838,8 +903,8 @@ const addSettingsMenu = async (isFM = false) => {
     );
 
     bindCheckboxToFunction(
-      lyricZoom,
-      (x: any) => {
+      lyricZoom! as HTMLInputElement,
+      (x) => {
         document.dispatchEvent(
           new CustomEvent("rnp-lyric-zoom", { detail: x }),
         );
@@ -847,8 +912,8 @@ const addSettingsMenu = async (isFM = false) => {
       false,
     );
     bindCheckboxToFunction(
-      lyricFade,
-      (x: any) => {
+      lyricFade! as HTMLInputElement,
+      (x) => {
         document.dispatchEvent(
           new CustomEvent("rnp-lyric-fade", { detail: x }),
         );
@@ -856,8 +921,8 @@ const addSettingsMenu = async (isFM = false) => {
       false,
     );
     bindCheckboxToFunction(
-      lyricBlur,
-      (x: any) => {
+      lyricBlur! as HTMLInputElement,
+      (x) => {
         document.dispatchEvent(
           new CustomEvent("rnp-lyric-blur", { detail: x }),
         );
@@ -865,14 +930,14 @@ const addSettingsMenu = async (isFM = false) => {
       false,
     );
     // @ts-ignore
-    bindCheckboxToClass(lyricRotate, "lyric-rotate", false, (x: any) => {
+    bindCheckboxToClass(lyricRotate, "lyric-rotate", false, (x) => {
       document.dispatchEvent(
         new CustomEvent("rnp-lyric-rotate", { detail: x }),
       );
     });
     bindSliderToFunction(
-      RotateCurvature,
-      (x: any) => {
+      RotateCurvature! as HTMLInputElement,
+      (x) => {
         document.dispatchEvent(
           new CustomEvent("rnp-rotate-curvature", { detail: x }),
         );
@@ -881,20 +946,20 @@ const addSettingsMenu = async (isFM = false) => {
       "change",
     );
     bindSelectGroupToClasses(
-      karaokeAnimation,
+      karaokeAnimation!,
       "float",
-      (x: any) => `rnp-karaoke-animation-${x}`,
-      (x: any) => {
+      (x) => `rnp-karaoke-animation-${x}`,
+      (x) => {
         document.dispatchEvent(
           new CustomEvent("rnp-karaoke-animation", { detail: x }),
         );
       },
     );
     bindSelectGroupToClasses(
-      currentLyricAlignmentPercentage,
+      currentLyricAlignmentPercentage!,
       "50",
-      (x: any) => `rnp-current-lyric-alignment-${x}`,
-      (x: any) => {
+      (x) => `rnp-current-lyric-alignment-${x}`,
+      (x) => {
         document.dispatchEvent(
           new CustomEvent("rnp-current-lyric-alignment-percentage", {
             detail: parseInt(x),
@@ -903,8 +968,8 @@ const addSettingsMenu = async (isFM = false) => {
       },
     );
     bindCheckboxToFunction(
-      lyricStagger,
-      (x: any) => {
+      lyricStagger as HTMLInputElement,
+      (x) => {
         document.dispatchEvent(
           new CustomEvent("rnp-lyric-stagger", { detail: x }),
         );
@@ -912,13 +977,13 @@ const addSettingsMenu = async (isFM = false) => {
       true,
     );
     bindSelectGroupToClasses(
-      lyricAnimationTiming,
+      lyricAnimationTiming!,
       "smooth",
-      (x: any) => `rnp-lyric-animation-timing-${x}`,
+      (x) => `rnp-lyric-animation-timing-${x}`,
     );
     bindCheckboxToFunction(
-      lyricGlow,
-      (x: any) => {
+      lyricGlow as HTMLInputElement,
+      (x) => {
         document.dispatchEvent(
           new CustomEvent("rnp-lyric-glow", { detail: x }),
         );
@@ -926,21 +991,23 @@ const addSettingsMenu = async (isFM = false) => {
       true,
     );
     bindSelectGroupToClasses(
-      lyricContributorsDisplay,
+      lyricContributorsDisplay!,
       "hover",
-      (x: any) => `rnp-lyric-contributors-${x}`,
+      (x) => `rnp-lyric-contributors-${x}`,
     );
 
-    const lyricOffsetSlider = getOptionDom("#rnp-lyric-offset-slider");
-    const lyricOffsetAdd = getOptionDom("#rnp-lyric-offset-add");
-    const lyricOffsetSub = getOptionDom("#rnp-lyric-offset-sub");
-    const lyricOffsetReset = getOptionDom("#rnp-lyric-offset-reset");
-    const lyricOffsetNumber = getOptionDom("#rnp-lyric-offset-number");
-    const lyricOffsetTip = getOptionDom("#rnp-lyric-offset-tip");
+    const lyricOffsetSlider = getOptionDom(
+      "#rnp-lyric-offset-slider",
+    )! as HTMLInputElement;
+    const lyricOffsetAdd = getOptionDom("#rnp-lyric-offset-add")!;
+    const lyricOffsetSub = getOptionDom("#rnp-lyric-offset-sub")!;
+    const lyricOffsetReset = getOptionDom("#rnp-lyric-offset-reset")!;
+    const lyricOffsetNumber = getOptionDom("#rnp-lyric-offset-number")!;
+    const lyricOffsetTip = getOptionDom("#rnp-lyric-offset-tip")!;
     bindSliderToFunction(
       lyricOffsetSlider,
-      (ms: any) => {
-        ms = parseInt(ms);
+      (ms_: string) => {
+        let ms = parseInt(ms_);
         document.dispatchEvent(
           new CustomEvent("rnp-global-offset", { detail: ms }),
         );
@@ -956,13 +1023,13 @@ const addSettingsMenu = async (isFM = false) => {
       "change",
     );
 
-    const setLyricOffsetValue = (ms: any) => {
-      lyricOffsetSlider.value = ms;
+    const setLyricOffsetValue = (ms: number) => {
+      lyricOffsetSlider.value = String(ms);
       lyricOffsetSlider.dispatchEvent(new Event("input"));
       lyricOffsetSlider.dispatchEvent(new Event("change"));
     };
     lyricOffsetAdd.addEventListener("click", () => {
-      setLyricOffsetValue(parseInt(getSetting("lyric-offset", 0)) + 100);
+      setLyricOffsetValue(parseInt(getSetting("lyric-offset", 0)!) + 100);
     });
     lyricOffsetSub.addEventListener("click", () => {
       setLyricOffsetValue(parseInt(getSetting("lyric-offset", 0)) - 100);
@@ -973,7 +1040,11 @@ const addSettingsMenu = async (isFM = false) => {
 
     // 字体
     const customFont = getOptionDom("#custom-font");
-    bindCheckboxToClass(customFont, "rnp-custom-font", false);
+    bindCheckboxToClass(
+      customFont! as HTMLInputElement,
+      "rnp-custom-font",
+      false,
+    );
     const customFontSectionContainer = getOptionDom("#rnp-custom-font-section");
     ReactDOM.render(<FontSettings />, customFontSectionContainer);
 
@@ -983,11 +1054,11 @@ const addSettingsMenu = async (isFM = false) => {
     const hideEntireBottombar = getOptionDom(
       "#hide-entire-bottombar-when-idle",
     );
-    const presentationMode = getOptionDom("#presentation-mode");
+    const presentationMode = getOptionDom("#presentation-mode")!;
     bindSliderToFunction(
-      fluidMaxFramerate,
-      (x: any) => {
-        x = parseInt(x);
+      fluidMaxFramerate! as HTMLInputElement,
+      (y) => {
+        let x = parseInt(y);
         const arr = ["5", "10", "30", "60", "inf"];
         for (let i = 0; i <= 4; i++) {
           document.body.classList.remove(`rnp-fluid-max-framerate-${arr[i]}`);
@@ -999,18 +1070,19 @@ const addSettingsMenu = async (isFM = false) => {
     );
     // @ts-ignore
     bindSliderToCSSVariable(
-      fluidBlur,
+      fluidBlur! as HTMLInputElement,
       "--fluid-blur",
       6,
       "change",
-      (x: any) => `${parseInt(Math.pow(2, x).toString())}px`,
+      (x) => `${parseInt(Math.pow(2, parseFloat(x)).toString())}px`,
     );
     bindCheckboxToClass(
-      hideEntireBottombar,
+      hideEntireBottombar! as HTMLInputElement,
       "hide-entire-bottombar-when-idle",
       false,
     );
-    presentationMode.addEventListener("change", (e: any) => {
+    presentationMode.addEventListener("change", (ev) => {
+      const e = ev as Event & { target: HTMLInputElement };
       addOrRemoveGlobalClassByOption("presentation-mode", e.target.checked);
     });
 
@@ -1018,56 +1090,73 @@ const addSettingsMenu = async (isFM = false) => {
     const hideSongAliasName = getOptionDom("#hide-song-alias-name");
     const hideComments = getOptionDom("#hide-comments");
     const partialBg = getOptionDom("#partial-bg");
-    bindCheckboxToClass(hideSongAliasName, "hide-song-alias-name", false);
-    bindCheckboxToClass(hideComments, "hide-comments", false);
-    bindCheckboxToClass(partialBg, "partial-bg", false);
+    bindCheckboxToClass(
+      hideSongAliasName! as HTMLInputElement,
+      "hide-song-alias-name",
+      false,
+    );
+    bindCheckboxToClass(
+      hideComments! as HTMLInputElement,
+      "hide-comments",
+      false,
+    );
+    bindCheckboxToClass(partialBg! as HTMLInputElement, "partial-bg", false);
 
     // 关于
-    const versionNumber = getOptionDom("#rnp-version-number");
+    const versionNumber = getOptionDom("#rnp-version-number")!;
     versionNumber.innerHTML = getPlugin().manifest.version;
-    const openWhatsNew = getOptionDom("#open-whats-new");
+    const openWhatsNew = getOptionDom("#open-whats-new")!;
     openWhatsNew.addEventListener("click", () => {
       whatsNew(true);
     });
   };
-  const initTabs = (menu: any) => {
+  const initTabs = (menu: HTMLDivElement) => {
     const tabs = menu.querySelectorAll(
       ".rnp-settings-menu-tabs .rnp-settings-menu-tab",
     );
-    const container = menu.querySelector(".rnp-settings-menu-inner");
+    const container = menu.querySelector(".rnp-settings-menu-inner")!;
     const sections = container.querySelectorAll(".rnp-group");
     let active =
-      container.querySelector(".rnp-group.active")?.dataset?.tab ??
-      "appearance";
-    const setActive = (name: any) => {
+      (container.querySelector(".rnp-group.active") as HTMLElement | null)
+        ?.dataset?.tab ?? "appearance";
+    const setActive = (name: string) => {
       if (name === active) return;
       active = name;
-      tabs.forEach((x: any) => {
+      tabs.forEach((ix) => {
+        const x = ix as HTMLElement;
         if (x.dataset.tab === name) x.classList.add("active");
         else x.classList.remove("active");
       });
     };
-    tabs.forEach((x: any) => {
-      x.addEventListener("click", () => {
+    tabs.forEach((ix) => {
+      ix.addEventListener("click", () => {
+        const x = ix as HTMLElement;
         const top =
-          container.querySelector(`.rnp-group[data-tab="${x.dataset.tab}"]`)
-            .offsetTop + 5;
+          (
+            container.querySelector(
+              `.rnp-group[data-tab="${x.dataset.tab}"]`,
+            )! as HTMLElement
+          ).offsetTop + 5;
         container.scrollTo({ top, behavior: "smooth" });
       });
     });
     container.addEventListener("scroll", () => {
       const top = container.scrollTop;
       if (top + container.clientHeight >= container.scrollHeight) {
-        setActive(sections[sections.length - 1].dataset.tab);
+        setActive(
+          (sections[sections.length - 1] as HTMLElement | undefined)!.dataset
+            .tab!,
+        );
         return;
       }
       let name = active;
-      sections.forEach((x: any) => {
-        if (x.offsetTop <= top) name = x.dataset.tab;
+      sections.forEach((ix) => {
+        const x = ix as HTMLElement;
+        if (x.offsetTop <= top) name = x.dataset.tab!;
       });
       setActive(name);
     });
-    menu.querySelector("input.rnp-settings").addEventListener("click", () => {
+    menu.querySelector("input.rnp-settings")!.addEventListener("click", () => {
       container.dispatchEvent(new Event("scroll"));
     });
   };
@@ -1084,7 +1173,7 @@ const addSettingsMenu = async (isFM = false) => {
     settingsMenu.innerHTML = settingsMenuHTML;
   }
 
-  if (document!.querySelector((settingsMenu as any).id)) {
+  if (document!.querySelector(settingsMenu.id)) {
     // @ts-ignore
     document.querySelector(settingsMenu.id).remove();
   }
@@ -1100,12 +1189,12 @@ const addSettingsMenu = async (isFM = false) => {
   initTabs(settingsMenu);
   hijackFailureNoticeCheck();
   /*channel.call(
-		"app.getLocalConfig", 
+		"app.getLocalConfig",
 		(GpuAccelerationEnabled) => {
 			if (!~~GpuAccelerationEnabled) {
 				document.body.classList.add('gpu-acceleration-disabled');
 			}
-		}, 
+		},
 		["setting", "hardware-acceleration"]
 	);*/
 };
@@ -1118,8 +1207,10 @@ const toggleFullScreen = (force = null) => {
       betterncm.app.setRoundedCorner(false);
     }
     document!.body.classList.add("rnp-full-screen");
-    (document as any).querySelector(".rnp-full-screen-button").title =
-      "退出全屏";
+
+    (
+      document.querySelector(".rnp-full-screen-button")! as HTMLButtonElement
+    ).title = "退出全屏";
   } else {
     if (document.exitFullscreen) {
       if (force === true) return;
@@ -1128,7 +1219,9 @@ const toggleFullScreen = (force = null) => {
         betterncm.app.setRoundedCorner(true);
       }
       document!.body.classList.remove("rnp-full-screen");
-      (document as any).querySelector(".rnp-full-screen-button").title = "全屏";
+      (
+        document.querySelector(".rnp-full-screen-button")! as HTMLButtonElement
+      ).title = "全屏";
     }
   }
 };
@@ -1146,13 +1239,9 @@ const addFullScreenButton = () => {
   fullScreenClock.classList.add("rnp-full-screen-clock");
   function updateClock() {
     var currentTime = new Date();
-    var hours = currentTime.getHours();
-    var minutes = currentTime.getMinutes();
+    var hours = currentTime.getHours().toString().padStart(2, "0");
+    var minutes = currentTime.getMinutes().toString().padStart(2, "0");
 
-    // 格式化小时和分钟，确保是两位数
-    (hours as any) = (("0" as any) + hours).slice(-2);
-    // @ts-ignore
-    minutes = ("0" + minutes).slice(-2);
     fullScreenClock.textContent = hours + ":" + minutes;
   }
   updateClock();
@@ -1304,8 +1393,12 @@ plugin.onLoad(async (p: any) => {
       background.classList.add("rnp-bg");
       ReactDOM.render(
         <Background
-          type={getSetting("background-type", "fluid")}
-          image={await waitForElementAsync!(".n-single .cdimg img" as any)}
+          type={getSetting("background-type", "fluid") as string}
+          image={
+            (await waitForElementAsync!(
+              ".n-single .cdimg img",
+            )) as HTMLImageElement | null
+          }
         />,
         background,
       );
@@ -1316,7 +1409,11 @@ plugin.onLoad(async (p: any) => {
       coverShadowController.classList.add("rnp-cover-shadow-controller");
       ReactDOM.render(
         <CoverShadow
-          image={await waitForElementAsync(".n-single .cdimg img")}
+          image={
+            (await waitForElementAsync(
+              ".n-single .cdimg img",
+            ))! as HTMLImageElement
+          }
         />,
         coverShadowController,
       );
@@ -1324,19 +1421,16 @@ plugin.onLoad(async (p: any) => {
 
       waitForElement(
         ".g-single-track .g-singlec-ct .n-single .mn .lyric",
-        (oldLyrics: any) => {
-          oldLyrics.remove();
+        (oldLyrics) => {
+          oldLyrics!.remove();
         },
       );
       const lyrics = document.createElement("div");
       lyrics.classList.add("lyric");
       ReactDOM.render(<Lyrics />, lyrics);
-      waitForElement(
-        ".g-single-track .g-singlec-ct .n-single .wrap",
-        (dom: HTMLElement | any) => {
-          dom.appendChild(lyrics);
-        },
-      );
+      waitForElement(".g-single-track .g-singlec-ct .n-single .wrap", (dom) => {
+        dom!.appendChild(lyrics);
+      });
 
       const miniSongInfo = document.createElement("div");
       miniSongInfo.classList.add("rnp-mini-song-info");
@@ -1345,7 +1439,7 @@ plugin.onLoad(async (p: any) => {
           <MiniSongInfo
             image={await waitForElementAsync(".n-single .cdimg img")}
             infContainer={await waitForElementAsync(
-              ".g-single .g-singlec-ct .n-single .mn .head .inf" as any,
+              ".g-single .g-singlec-ct .n-single .mn .head .inf",
             )}
           />,
           miniSongInfo,
@@ -1374,13 +1468,13 @@ plugin.onLoad(async (p: any) => {
   });
 
   // Add progressbar hover preview
-  waitForElement("#main-player .prg", (dom: HTMLElement | any) => {
+  waitForElement("#main-player .prg", (dom) => {
     const progressbarPreview = document.createElement("div");
     progressbarPreview.classList.add("rnp-progressbar-preview");
     ReactDOM.render(<ProgressbarPreview dom={dom} />, progressbarPreview);
     document.body.appendChild(progressbarPreview);
   });
-  waitForElement(".m-player-fm .prg", (dom: HTMLElement | any) => {
+  waitForElement(".m-player-fm .prg", (dom) => {
     const progressbarPreview = document.createElement("div");
     progressbarPreview.classList.add("rnp-progressbar-preview");
     progressbarPreview.classList.add("rnp-progressbar-preview-fm");
@@ -1426,16 +1520,14 @@ plugin.onLoad(async (p: any) => {
 
   // 私人 FM
   const patchFM = async () => {
-    if (
-      document!.querySelector("#page_pc_userfm_songplay:not(.patched)" as any)
-    ) {
+    if (document!.querySelector("#page_pc_userfm_songplay:not(.patched)")) {
       // @ts-ignore
       document
         .querySelector("#page_pc_userfm_songplay")
         .classList.add("patched");
       FMObserver.disconnect();
 
-      const lyrics = document!.createElement("div" as any);
+      const lyrics = document!.createElement("div");
       lyrics.classList.add("lyric");
       // @ts-ignore
       document.querySelector("#page_pc_userfm_songplay").appendChild(lyrics);
@@ -1451,13 +1543,15 @@ plugin.onLoad(async (p: any) => {
       ReactDOM.render(
         <Background
           type={getSetting("background-type", "fluid")}
-          image={await waitForElementAsync(
-            "#page_pc_userfm_songplay .fmplay .covers",
-          )}
+          image={
+            (await waitForElementAsync(
+              "#page_pc_userfm_songplay .fmplay .covers",
+            )) as HTMLImageElement | null
+          }
           isFM={true}
-          imageChangedCallback={(dom: HTMLElement | any) => {
+          imageChangedCallback={(dom) => {
             if (!dom) return;
-            (calcAccentColor as any)!(dom, true);
+            calcAccentColor!(dom, true);
           }}
         />,
         background,
@@ -1486,7 +1580,7 @@ plugin.onLoad(async (p: any) => {
   });
 
   // Listen system theme change
-  const toggleSystemDarkmodeClass = (media: any) => {
+  const toggleSystemDarkmodeClass = (media: MediaQueryList) => {
     document.body.classList.add(
       media.matches ? "rnp-system-dark" : "rnp-system-light",
     );
@@ -1504,13 +1598,13 @@ plugin.onLoad(async (p: any) => {
   toggleSystemDarkmodeClass(systemDarkmodeMedia);
 
   // Idle detection
-  const IdleThreshold: any = 1.5 * 1000;
+  const IdleThreshold = 1.5 * 1000;
   // @ts-ignore
   let idleTimer = null;
   let idle = false;
   // @ts-ignore
   let debounceTime: number | null = null;
-  let debounceTimer: any = null;
+  let debounceTimer: number | null = null;
   const resetIdleTimer = () => {
     // @ts-ignore
     if (idleTimer) clearTimeout(idleTimer);
@@ -1528,7 +1622,7 @@ plugin.onLoad(async (p: any) => {
     }
     resetIdleTimer();
   };
-  const setIdle: any = () => {
+  const setIdle = () => {
     debounceTimer = setTimeout(
       () => {
         // @ts-ignore
@@ -1542,15 +1636,15 @@ plugin.onLoad(async (p: any) => {
   };
   resetIdleTimer();
   document.addEventListener("mousemove", resetIdle);
-  document.addEventListener("mouseout", (e: any) => {
+  document.addEventListener("mouseout", (e) => {
     if (e.relatedTarget === null) {
       setIdle();
     }
   });
 
   // Listen for now playing open
-  new MutationObserver((mutations: any) => {
-    mutations.forEach((mutation: any) => {
+  new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
       if (mutation.addedNodes.length > 0) {
         mutation.addedNodes.forEach((node: any) => {
           if (node.classList && node.classList.contains("g-single")) {
@@ -1576,9 +1670,9 @@ plugin.onConfig((tools: any) => {
     {},
     dom("span", {
       innerHTML: "打开正在播放界面以调整设置 ",
-      style: { fontSize: "18px" as any },
+      style: { fontSize: "18px" },
     }),
-    (tools as any).makeBtn("打开", async () => {
+    tools.makeBtn("打开", async () => {
       // @ts-ignore
       document.querySelector("a[data-action='max']").click();
     }),

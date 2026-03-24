@@ -8,51 +8,64 @@ const useEffect = React.useEffect;
 const useRef = React.useRef;
 
 export function Background(props: {
+  type?: string;
+  image: HTMLImageElement | null;
   isFM?: boolean;
-  src?: string;
-  [key: string]: any;
+  imageChangedCallback?: (dom: HTMLElement | any) => void;
 }) {
-  const [type, setType] = useState<any>(props.type ?? "blur"); // blur, gradient, fluid , solid
-  const [url, setUrl] = useState<any>("");
-  const [staticFluid, setStaticFluid] = useState<any>(true);
+  const [type, setType] = useState<string>(props.type ?? "blur"); // blur, gradient, fluid , solid
+  const [url, setUrl] = useState<string>("");
+  const [staticFluid, setStaticFluid] = useState<boolean>(true);
   const image = props.image;
 
   if (!props.isFM) {
     useEffect(() => {
       const observer = new MutationObserver(() => {
-        if (image.src === url) return;
-        if (image.complete) {
-          setUrl(image.src);
+        if (image!.src === url) return;
+        if (image!.complete) {
+          setUrl(image!.src);
         }
       });
-      observer.observe(image, { attributes: true, attributeFilter: ["src"] });
+      observer.observe(image!, { attributes: true, attributeFilter: ["src"] });
       const onload = () => {
-        setUrl(image.src);
+        setUrl(image!.src);
       };
-      image.addEventListener("load", onload);
+      image!.addEventListener("load", onload);
       return () => {
         observer.disconnect();
-        image.removeEventListener("load", onload);
+        image!.removeEventListener("load", onload);
       };
     }, [image]);
   } else {
     useEffect(() => {
       const imageContainer = image;
-      if (imageContainer.querySelector(".cvr.j-curr img")) {
-        setUrl(imageContainer.querySelector(".cvr.j-curr img").src);
-        props.imageChangedCallback(
-          imageContainer.querySelector(".cvr.j-curr img"),
+      if (imageContainer!.querySelector(".cvr.j-curr img")) {
+        setUrl(
+          (
+            imageContainer!.querySelector(
+              ".cvr.j-curr img",
+            )! as HTMLImageElement
+          ).src,
+        );
+        props.imageChangedCallback!(
+          imageContainer!.querySelector(".cvr.j-curr img"),
         );
       }
       const observer = new MutationObserver(() => {
-        if (imageContainer.querySelector(".cvr.j-curr img")) {
-          setUrl(imageContainer.querySelector(".cvr.j-curr img").src);
-          props.imageChangedCallback(
-            imageContainer.querySelector(".cvr.j-curr img"),
+        if (imageContainer!.querySelector(".cvr.j-curr img")) {
+          setUrl(
+            (
+              imageContainer!.querySelector(
+                ".cvr.j-curr img",
+              )! as HTMLImageElement
+            ).src,
+          );
+          props.imageChangedCallback!(
+            imageContainer!.querySelector(".cvr.j-curr img"),
           );
         }
       });
-      observer.observe(imageContainer, { childList: true, subtree: true });
+      observer.observe(imageContainer!, { childList: true, subtree: true });
       return () => {
         observer.disconnect();
       };
@@ -95,13 +108,9 @@ export function Background(props: {
     </>
   );
 }
-function BlurBackground(props: {
-  isFM?: boolean;
-  src?: string;
-  [key: string]: any;
-}) {
+function BlurBackground(props: { url: string }) {
   // @ts-ignore
-  const ref = useRef<any>();
+  const ref = useRef<HTMLDivElement>();
   useEffect(() => {
     if (!props.url) return;
     ref.current.style.backgroundImage = `url(${props.url})`;
@@ -111,12 +120,8 @@ function BlurBackground(props: {
   return <div ref={ref} className="rnp-background-blur" />;
 }
 
-function GradientBackground(props: {
-  isFM?: boolean;
-  src?: string;
-  [key: string]: any;
-}) {
-  const [gradient, setGradient] = useState<any>(
+function GradientBackground(props: { url: string }) {
+  const [gradient, setGradient] = useState<string>(
     "linear-gradient(-45deg, #666, #fff)",
   );
   useEffect(() => {
@@ -126,7 +131,7 @@ function GradientBackground(props: {
     image.onload = () => {
       console.log("image loaded");
       const paletteObjs = getPaletteSync(image);
-      const palette = paletteObjs!.map((c: any) => [
+      const palette = paletteObjs!.map((c) => [
         c.rgb().r,
         c.rgb().g,
         c.rgb().b,
@@ -147,38 +152,38 @@ function GradientBackground(props: {
 
 function FluidBackground(props: {
   isFM?: boolean;
-  src?: string;
-  [key: string]: any;
+  static: boolean;
+  url: string;
 }) {
   // @ts-ignore
   const [canvas1, canvas2, canvas3, canvas4] = [
-    useRef<any>(null),
-    useRef<any>(null),
-    useRef<any>(null),
-    useRef<any>(null),
+    useRef<HTMLCanvasElement>(null),
+    useRef<HTMLCanvasElement>(null),
+    useRef<HTMLCanvasElement>(null),
+    useRef<HTMLCanvasElement>(null),
   ];
   // @ts-ignore
   const [feTurbulence, feDisplacementMap] = [
-    useRef<any>(null),
-    useRef<any>(null),
+    useRef<SVGFETurbulenceElement>(null),
+    useRef<SVGFEDisplacementMapElement>(null),
   ];
   // @ts-ignore
-  const fluidContainer = useRef<any>(null);
+  const fluidContainer = useRef<HTMLDivElement | null>(null);
   // @ts-ignore
-  const staticFluidStyleRef = useRef<any>(null);
-  const [songId, setSongId] = useState<any>("0");
+  const staticFluidStyleRef = useRef<HTMLStyleElement>(null);
+  const [songId, setSongId] = useState<string>("0");
 
-  const playState = useRef<any>(
-    (document as any)!
-      .querySelector("#main-player .btnp")
+  const playState = useRef<boolean>(
+    document!
+      .querySelector("#main-player .btnp")!
       .classList.contains("btnp-pause"),
   );
 
   const onPlayStateChange = (id: string, state: any) => {
     //playState.current = (state.split('|')[1] == 'resume');
     if (!props.isFM) {
-      playState.current = (document as any)!
-        .querySelector("#main-player .btnp")
+      playState.current = document!
+        .querySelector("#main-player .btnp")!
         .classList.contains("btnp-pause");
     } else {
       // @ts-ignore
@@ -187,12 +192,12 @@ function FluidBackground(props: {
         .classList.contains("btnp-pause");
     }
     setSongId(id);
-    fluidContainer.current.classList.toggle("paused", !playState.current);
+    fluidContainer.current!.classList.toggle("paused", !playState.current);
     //console.log(id, playState.current, state.split('|')[1], document.querySelector("#main-player .btnp").classList.contains("btnp-pause"));
   };
 
   useEffect(() => {
-    fluidContainer.current.classList.toggle("paused", !playState.current);
+    fluidContainer.current!.classList.toggle("paused", !playState.current);
   }, [songId]);
 
   useEffect(() => {
@@ -211,10 +216,10 @@ function FluidBackground(props: {
   }, []);
 
   useEffect(() => {
-    canvas1.current.getContext("2d").filter = "blur(5px)";
-    canvas2.current.getContext("2d").filter = "blur(5px)";
-    canvas3.current.getContext("2d").filter = "blur(5px)";
-    canvas4.current.getContext("2d").filter = "blur(5px)";
+    canvas1.current!.getContext("2d")!.filter = "blur(5px)";
+    canvas2.current!.getContext("2d")!.filter = "blur(5px)";
+    canvas3.current!.getContext("2d")!.filter = "blur(5px)";
+    canvas4.current!.getContext("2d")!.filter = "blur(5px)";
   }, []);
 
   useEffect(() => {
@@ -222,17 +227,17 @@ function FluidBackground(props: {
     image.crossOrigin = "Anonymous";
     image.onload = () => {
       const { width, height } = image;
-      canvas1.current
-        .getContext("2d")
+      canvas1
+        .current!.getContext("2d")!
         .drawImage(image, 0, 0, width / 2, height / 2, 0, 0, 100, 100);
-      canvas2.current
-        .getContext("2d")
+      canvas2
+        .current!.getContext("2d")!
         .drawImage(image, width / 2, 0, width / 2, height / 2, 0, 0, 100, 100);
-      canvas3.current
-        .getContext("2d")
+      canvas3
+        .current!.getContext("2d")!
         .drawImage(image, 0, height / 2, width / 2, height / 2, 0, 0, 100, 100);
-      canvas4.current
-        .getContext("2d")
+      canvas4
+        .current!.getContext("2d")!
         .drawImage(
           image,
           width / 2,
@@ -248,7 +253,7 @@ function FluidBackground(props: {
     image.src = props.url;
     // @ts-ignore
     feTurbulence.current.setAttribute("seed", parseInt(Math.random() * 1000));
-    staticFluidStyleRef.current.innerHTML = `
+    staticFluidStyleRef.current!.innerHTML = `
 			body.static-fluid .rnp-background-fluid-rect {
 				animation-play-state: paused !important;
 				// @ts-ignore
@@ -271,12 +276,12 @@ function FluidBackground(props: {
     for (let x = 0; x <= 1; x++) {
       for (let y = 0; y <= 1; y++) {
         const canvas = canvasList[y * 2 + x];
-        canvas.current.style.width = `${canvasSize}px`;
-        canvas.current.style.height = `${canvasSize}px`;
+        canvas.current!.style.width = `${canvasSize}px`;
+        canvas.current!.style.height = `${canvasSize}px`;
         const signX = x === 0 ? -1 : 1,
           signY = y === 0 ? -1 : 1;
-        canvas.current.style.left = `${width / 2 + signX * canvasSize * 0.35 - canvasSize / 2}px`;
-        canvas.current.style.top = `${height / 2 + signY * canvasSize * 0.35 - canvasSize / 2}px`;
+        canvas.current!.style.left = `${width / 2 + signX * canvasSize * 0.35 - canvasSize / 2}px`;
+        canvas.current!.style.top = `${height / 2 + signY * canvasSize * 0.35 - canvasSize / 2}px`;
       }
     }
   };
@@ -289,9 +294,9 @@ function FluidBackground(props: {
     };
   }, []);
 
-  const setDisplacementScale = React.useCallback((value: any) => {
+  const setDisplacementScale = React.useCallback((value: string) => {
     if (!feDisplacementMap.current) return;
-    (feDisplacementMap as any).current.setAttribute("scale", value);
+    feDisplacementMap.current.setAttribute("scale", value);
   }, []);
 
   // Audio-responsive background (For LibVolumeLevelProvider)
@@ -307,7 +312,7 @@ function FluidBackground(props: {
 			processor.current.filter.type = 'lowpass';
 			processor.current.bufferLength = processor.current.analyser.frequencyBinCount;
 			processor.current.dataArray = new Float32Array(processor.current.bufferLength);
-		}, []); 
+		}, []);
 
 		const onAudioSourceChange = (e) => {
 			processor.current.audio = e.detail;
@@ -318,7 +323,7 @@ function FluidBackground(props: {
 			processor.current.audioSource.connect(processor.current.filter).connect(processor.current.analyser);
 			processor.current.audioSource.connect(processor.current.audioContext.destination);
 		};
-			
+
 		useEffect(() => {
 			loadedPlugins.LibFrontendPlay.addEventListener(
 				"updateCurrentAudioPlayer",
@@ -332,7 +337,10 @@ function FluidBackground(props: {
 			}
 		}, []);*/
 
-    const processor = useRef<any>({});
+    const processor = useRef<{
+      bufferLength?: number;
+      dataArray?: Float32Array;
+    }>({});
     useEffect(() => {
       //processor.current.bufferLength = loadedPlugins.LibFrontendPlay.currentAudioAnalyser.frequencyBinCount;
       processor.current.bufferLength = 1024;
@@ -341,7 +349,7 @@ function FluidBackground(props: {
       );
     }, []);
 
-    const request = useRef<any>(0);
+    const request = useRef(0);
     useEffect(() => {
       const animate = () => {
         request.current = requestAnimationFrame(animate);
@@ -351,12 +359,12 @@ function FluidBackground(props: {
         loadedPlugins.LibFrontendPlay.currentAudioAnalyser.getFloatFrequencyData(
           processor.current.dataArray,
         );
-        const max = Math.max(...processor.current.dataArray);
+        const max = Math.max(...processor.current.dataArray!);
         //const percentage = (max - processor.current.analyser.minDecibels) / (processor.current.analyser.maxDecibels - processor.current.analyser.minDecibels);
         const percentage = Math.pow(1.3, max / 20) * 2 - 1;
         //console.log(max, percentage, processor.current.audio.volume);
         setDisplacementScale(
-          Math.min(600, Math.max(200, 800 - percentage * 800)),
+          String(Math.min(600, Math.max(200, 800 - percentage * 800))),
         );
       };
       request.current = requestAnimationFrame(animate);
@@ -367,55 +375,43 @@ function FluidBackground(props: {
   }
   // Audio-responsive background (For LibVolumeLevelProvider)
   else if (typeof registerAudioLevelCallback == "function") {
-    let audioLevels = {},
+    let audioLevels: Record<number, number> = {},
       audioLevelSum = 0,
       now = 0;
     // @ts-ignore
-    let maxq: any[] = [],
-      minq: any[] = [];
-    let percentage: any;
+    let maxq: number[] = [],
+      minq: number[] = [];
+    let percentage: number;
     const onAudioLevelChange = (value: any) => {
       if (!playState.current) return;
       now += 1;
       if (now <= 100) {
-        (audioLevels as any)[now] = value;
+        audioLevels[now] = value;
         audioLevelSum += value;
         // @ts-ignore
-        while (
-          (maxq as any as any).length &&
-          (audioLevels as any)[maxq[maxq.length - 1]] <= value
-        )
+        while (maxq.length && audioLevels[maxq[maxq.length - 1]] <= value)
           maxq.pop();
         maxq.push(now);
         // @ts-ignore
-        while (
-          minq.length &&
-          (audioLevels as any)[minq[minq.length - 1]] >= value
-        )
+        while (minq.length && audioLevels[minq[minq.length - 1]] >= value)
           minq.pop();
         minq.push(now);
-        setDisplacementScale(400 - value * 200);
+        setDisplacementScale(String(400 - value * 200));
         return;
       }
       // @ts-ignore
       audioLevelSum -= audioLevels[now - 100];
-      delete (audioLevels as any)[now - 100];
+      delete audioLevels[now - 100];
       // @ts-ignore
-      (audioLevels as any)[now] = value;
+      audioLevels[now] = value;
       audioLevelSum += value;
       // @ts-ignore
-      while (
-        maxq.length &&
-        (audioLevels as any)[maxq[maxq.length - 1]] <= value
-      )
+      while (maxq.length && audioLevels[maxq[maxq.length - 1]] <= value)
         maxq.pop();
       maxq.push(now);
       while (maxq[0] <= now - 100) maxq.shift();
       // @ts-ignore
-      while (
-        minq.length &&
-        (audioLevels as any)[minq[minq.length - 1]] >= value
-      )
+      while (minq.length && audioLevels[minq[minq.length - 1]] >= value)
         minq.pop();
       minq.push(now);
       while (minq[0] <= now - 100) minq.shift();
@@ -423,11 +419,11 @@ function FluidBackground(props: {
       //console.log(value, audioLevelSum / 100, value - audioLevelSum / 100);
       // @ts-ignore
       percentage =
-        (value - (audioLevels as any)[minq[0]]) /
-        ((audioLevels as any)[maxq[0]] - (audioLevels as any)[minq[0]]);
+        (value - audioLevels[minq[0]]) /
+        (audioLevels[maxq[0]] - audioLevels[minq[0]]);
       if (percentage != percentage) percentage = 1 / 3; // NaN
       // @ts-ignore
-      function easeInOutQuint(x) {
+      function easeInOutQuint(x: number) {
         return x < 0.5
           ? 16 * x * x * x * x * x
           : 1 - Math.pow(-2 * x + 2, 5) / 2;
@@ -438,15 +434,15 @@ function FluidBackground(props: {
       //feDisplacementMap.current.setAttribute('scale', scale);
       if (!feDisplacementMap.current) return;
       const oldScale = parseFloat(
-        (feDisplacementMap.current as any).getAttribute("scale"),
+        feDisplacementMap.current.getAttribute("scale")!,
       );
-      setDisplacementScale(oldScale + (scale - oldScale) * 0.1);
+      setDisplacementScale(String(oldScale + (scale - oldScale) * 0.1));
     };
     useEffect(() => {
       registerAudioLevelCallback(onAudioLevelChange);
       return () => {
         unregisterAudioLevelCallback(onAudioLevelChange);
-        setDisplacementScale(400);
+        setDisplacementScale(String(400));
       };
     }, []);
     useEffect(() => {

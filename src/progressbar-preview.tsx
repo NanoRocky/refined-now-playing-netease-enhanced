@@ -1,11 +1,9 @@
-import React from "react";
+import React, { RefObject } from "react";
 import "./progressbar-preview.scss";
 import { getSetting } from "./utils";
 
 const isFMSession = () => {
-  return !(document as any)!
-    .querySelector(".m-player-fm")
-    .classList.contains("f-dn");
+  return !document!.querySelector(".m-player-fm")!.classList.contains("f-dn");
 };
 
 if (getSetting("enable-progressbar-preview", true)) {
@@ -16,11 +14,13 @@ const useState = React.useState;
 const useEffect = React.useEffect;
 const useRef = React.useRef;
 
-function useRefState(initialValue: any) {
-  const [value, setValue] = useState<any>(initialValue);
-  const valueRef = useRef<any>(value);
+function useRefState<T>(
+  initialValue: T | null,
+): [RefObject<T | null>, T | null, (val: T) => void] {
+  const [value, setValue] = useState(initialValue);
+  const valueRef = useRef(value);
 
-  const updateValue = (val: any) => {
+  const updateValue = (val: T) => {
     valueRef.current = val;
     setValue(val);
   };
@@ -64,7 +64,7 @@ export function ProgressbarPreview(props: {
     progressBarRef.current = props.dom;
   }, []);
 
-  const [_lyrics, lyrics, setLyrics] = useRefState(null);
+  const [_lyrics, lyrics, setLyrics] = useRefState(null as any[] | null);
   const [nonInterludeCount, setNonInterludeCount] = useState<any>(0);
 
   const hoverPercentRef = useRef<any>(0);
@@ -126,7 +126,7 @@ export function ProgressbarPreview(props: {
     const rect = progressBarRef.current.getBoundingClientRect();
     const percent = (xRef.current - rect.left) / rect.width;
     hoverPercentRef.current = percent;
-    const currentTime = _totalLength.current * percent;
+    const currentTime = _totalLength.current! * percent;
     setCurrentTime(currentTime);
     if (_lyrics.current) {
       let cur = 0;
@@ -154,7 +154,7 @@ export function ProgressbarPreview(props: {
       if (subprogressbarInnerRef.current) {
         let duration = _lyrics.current[cur]?.duration;
         if (duration == 0) {
-          duration = _totalLength.current - _lyrics.current[cur].time;
+          duration = _totalLength.current! - _lyrics.current[cur].time;
         }
         subprogressbarInnerRef.current.style.width =
           ((currentTime - _lyrics.current[cur].time) / duration) * 100 + "%";
@@ -285,7 +285,7 @@ export function ProgressbarPreview(props: {
                   (lyrics[currentLine]?.time + lyrics[currentLine]?.duration) /
                     1000,
                 )
-              : formatTime(totalLength / 1000)}
+              : formatTime(totalLength! / 1000)}
           </div>
         </div>
       )}

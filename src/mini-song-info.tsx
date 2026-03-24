@@ -10,9 +10,9 @@ export function MiniSongInfo(props: {
   src?: string;
   [key: string]: any;
 }) {
-  const [title, setTitle] = useState<any>("");
-  const [artist, setArtist] = useState<any>("");
-  const [album, setAlbum] = useState<any>("");
+  const [title, setTitle] = useState("");
+  const [artist, setArtist] = useState("");
+  const [album, setAlbum] = useState("");
 
   const image = props.image;
 
@@ -37,13 +37,15 @@ export function MiniSongInfo(props: {
   const infContainer = props.infContainer;
   useEffect(() => {
     const onObverse = () => {
-      const title = infContainer
-        .querySelector(".title .name")
-        .textContent.trim();
+      const title = (
+        infContainer.querySelector(".title .name")! as HTMLElement
+      ).textContent.trim();
       const artist = Array.from(
-        infContainer.querySelectorAll(".info .playfrom > li:first-child a"),
+        infContainer.querySelectorAll(
+          ".info .playfrom > li:first-child a",
+        )! as HTMLAnchorElement[],
       )
-        .map((a: any) => a.textContent.trim())
+        .map((a) => a.textContent.trim())
         .join(" / ");
       setTitle(title);
       setArtist(artist);

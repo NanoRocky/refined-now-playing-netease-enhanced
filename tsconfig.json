@@ -15,7 +15,7 @@
             "WebWorker"
         ],
         "module": "ESNext",
-        "types": [],
+        "types": ["./src/type.d.ts"],
         "jsx": "react-jsx",
         "moduleResolution": "bundler",
         "resolveJsonModule": true,

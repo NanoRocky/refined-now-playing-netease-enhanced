@@ -1,8 +1,10 @@
-import { parseLyric } from "./liblyric/index";
+import { LyricLine, parseLyric } from "./liblyric/index";
 import { cyrb53, getSetting } from "./utils";
 import { fetchAMLL, parseAMLLTTML } from "./amll-provider";
 
-const processLyrics = (lyrics: any) => {
+const processLyrics = (
+  lyrics: (LyricLine & { isInterlude?: boolean; unsynced?: boolean })[],
+) => {
   for (const line of lyrics) {
     if (line.originalLyric == "") {
       line.isInterlude = true;
@@ -11,7 +13,7 @@ const processLyrics = (lyrics: any) => {
   return lyrics;
 };
 
-let currentRawLRC: any = null;
+let currentRawLRC: null | string = null;
 
 const _onProcessLyrics = window.onProcessLyrics ?? ((x: any) => x);
 window.onProcessLyrics = (_rawLyrics: any, songID: any) => {
@@ -35,7 +37,8 @@ window.onProcessLyrics = (_rawLyrics: any, songID: any) => {
     console.log("Update Raw Lyrics", rawLyrics);
     currentRawLRC = rawLyrics?.lrc?.lyric ?? "";
     setTimeout(async () => {
-      let processedLyricsToUse = null;
+      let processedLyricsToUse: (LyricLine & { unsynced?: boolean })[] | null =
+        null;
 
       const enableAMLL = getSetting("enable-amll", true);
       const amllFastSource = getSetting("amll-fast-source", false);
@@ -127,32 +130,32 @@ window.onProcessLyrics = (_rawLyrics: any, songID: any) => {
         console.log("Using Fallback Lyrics");
       }
 
-      const processedLyrics = await processLyrics(processedLyricsToUse);
+      const processedLyrics = processLyrics(processedLyricsToUse);
       const lyrics = {
         lyrics: processedLyrics,
-        contributors: {},
+        contributors: {} as Refine.MayContributors,
+        unsynced: undefined as undefined | boolean,
+        hash: undefined as undefined | string,
       };
 
       if (processedLyrics[0]?.unsynced) {
-        (lyrics as any).unsynced = true;
+        lyrics.unsynced = true;
       }
 
       if (rawLyrics?.lyricUser) {
-        (lyrics as any).contributors.original = {
+        lyrics.contributors.original = {
           name: rawLyrics.lyricUser.nickname,
           userid: rawLyrics.lyricUser.userid,
         };
       }
       if (rawLyrics?.transUser) {
-        (lyrics as any).contributors.translation = {
+        lyrics.contributors.translation = {
           name: rawLyrics.transUser.nickname,
           userid: rawLyrics.transUser.userid,
         };
       }
-      (lyrics.contributors as any).roles = rawLyrics?.roles ?? [];
-      (lyrics.contributors as any).roles = (
-        lyrics as any
-      ).contributors.roles.filter((role: any) => {
+      lyrics.contributors.roles = rawLyrics?.roles ?? [];
+      lyrics.contributors.roles = lyrics.contributors.roles.filter((role) => {
         if (
           role.artistMetaList.length == 1 &&
           role.artistMetaList[0].artistName == "无" &&
@@ -163,33 +166,27 @@ window.onProcessLyrics = (_rawLyrics: any, songID: any) => {
         return true;
       });
       // 合并相同的贡献者角色
-      for (let i = 0; i < (lyrics as any).contributors.roles.length; i++) {
-        const metaList = (JSON as any as any).stringify(
-          (lyrics.contributors as any).roles[i].artistMetaList,
+      for (let i = 0; i < lyrics.contributors.roles.length; i++) {
+        const metaList = JSON.stringify(
+          lyrics.contributors.roles[i].artistMetaList,
         );
-        for (
-          let j = i + 1;
-          j < (lyrics as any).contributors.roles.length;
-          j++
-        ) {
+        for (let j = i + 1; j < lyrics.contributors.roles.length; j++) {
           if (
-            JSON.stringify(
-              (lyrics.contributors as any).roles[j].artistMetaList,
-            ) === metaList
+            JSON.stringify(lyrics.contributors.roles[j].artistMetaList) ===
+            metaList
           ) {
-            (lyrics.contributors as any).roles[i].roleName +=
-              `、${((lyrics as any).contributors.roles[j] as any).roleName}`;
-            (lyrics as any).contributors.roles.splice(j, 1);
+            lyrics.contributors.roles[i].roleName +=
+              `、${lyrics.contributors.roles[j].roleName}`;
+            lyrics.contributors.roles.splice(j, 1);
             j--;
           }
         }
       }
 
       if (rawLyrics?.source) {
-        ((lyrics as any).contributors as any).lyricSource = rawLyrics.source;
+        lyrics.contributors.lyricSource = rawLyrics.source;
       }
-      (lyrics as any).hash =
-        `${betterncm.ncm.getPlaying().id}-${cyrb53(processedLyrics.map((x: any) => x.originalLyric).join("\\"))}`;
+      lyrics.hash = `${betterncm.ncm.getPlaying().id}-${cyrb53(processedLyrics.map((x) => x.originalLyric).join("\\"))}`;
       window.currentLyrics = lyrics;
       console.group("Update Processed Lyrics");
       console.log("lyrics", window.currentLyrics.lyrics);

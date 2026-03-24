@@ -12,16 +12,12 @@ const getCoverType = () => {
   }
 };
 
-export function CoverShadow(props: {
-  isFM?: boolean;
-  src?: string;
-  [key: string]: any;
-}) {
-  const [type, setType] = useState<any>(getCoverType()); // black and colorful
-  const [rectangleCover, setRectangleCover] = useState<any>(
-    getSetting("rectangle-cover", true),
+export function CoverShadow(props: { image: HTMLImageElement }) {
+  const [type, setType] = useState(getCoverType()); // black and colorful
+  const [rectangleCover, setRectangleCover] = useState(
+    getSetting("rectangle-cover", true) as boolean,
   );
-  const [url, setUrl] = useState<any>("");
+  const [url, setUrl] = useState("");
 
   const image = props.image;
 

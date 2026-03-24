@@ -1,4 +1,4 @@
-import React from "react";
+import React, { RefObject } from "react";
 import "./lyric-provider";
 import { getSetting, setSetting, copyTextToClipboard } from "./utils";
 import { showContextMenu } from "./context-menu";
@@ -14,9 +14,7 @@ const useCallback = React.useCallback;
 const useRef = React.useRef;
 
 const isFMSession = () => {
-  return !(document as any)!
-    .querySelector(".m-player-fm")
-    .classList.contains("f-dn");
+  return !document!.querySelector(".m-player-fm")!.classList.contains("f-dn");
 };
 
 // @ts-ignore
@@ -35,26 +33,28 @@ const customScaleFunc = localStorage.getItem("rnp-custom-scale-func")
   ? new Function("offset", localStorage.getItem("rnp-custom-scale-func") || "")
   : null;
 
-const useRefState = (initialValue: any) => {
-  const [value, setValue] = useState<any>(initialValue);
-  const ref = useRef<any>(value);
+const useRefState = (
+  initialValue: number,
+): [
+  number,
+  React.Dispatch<React.SetStateAction<number>>,
+  RefObject<number>,
+] => {
+  const [value, setValue] = useState(initialValue);
+  const ref = useRef(value);
   useEffect(() => {
     ref.current = value;
   }, [value]);
   return [value, setValue, ref];
 };
 
-export function Lyrics(props: {
-  isFM?: boolean;
-  src?: string;
-  [key: string]: any;
-}) {
+export function Lyrics(props: { isFM?: boolean }) {
   const isFM = props.isFM ?? false;
 
   const getPlayState = () => {
     if (!isFM) {
-      return (document as any)!
-        .querySelector("#main-player .btnp")
+      return document!
+        .querySelector("#main-player .btnp")!
         .classList.contains("btnp-pause");
     } else {
       // @ts-ignore
@@ -64,117 +64,118 @@ export function Lyrics(props: {
     }
   };
 
-  const containerRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  let [lyrics, setLyrics] = useState<any>(null);
-  const _lyrics = useRef<any>(null);
+  let [lyrics, setLyrics]: [any[], (x: any[]) => void] = useState<any[]>([]);
+  const _lyrics = useRef(lyrics);
   const _setLyrics = setLyrics;
-  setLyrics = (x: any) => {
+  setLyrics = (x: any[]) => {
     _lyrics.current = x;
     _setLyrics(x);
   };
-  const [hasTranslation, setHasTranslation] = useState<any>(false);
-  const [hasRomaji, setHasRomaji] = useState<any>(false);
-  const [hasKaraoke, setHasKaraoke] = useState<any>(false);
-  const [isUnsynced, setIsUnsynced] = useState<any>(false); // 歌词不支持滚动
+  const [hasTranslation, setHasTranslation] = useState(false);
+  const [hasRomaji, setHasRomaji] = useState(false);
+  const [hasKaraoke, setHasKaraoke] = useState(false);
+  const [isUnsynced, setIsUnsynced] = useState(false); // 歌词不支持滚动
 
-  const [lyricContributors, setLyricContributors] = useState<any>(null);
+  const [lyricContributors, setLyricContributors] = useState<Refine.MayContributors | null>(null);
 
-  const [playState, setPlayState] = useState<any>(getPlayState());
-  const _playState = useRef<any>(getPlayState());
-  const [songId, setSongId] = useState<any>("0");
-  const currentTime = useRef<any>(0); // 当前播放时间
-  const [seekCounter, setSeekCounter] = useState<any>(0); // 拖动进度条时修改触发重渲染
-  const [recalcCounter, setRecalcCounter] = useState<any>(0); // 手动重计算时触发渲染
+  const [playState, setPlayState] = useState(getPlayState());
+  const _playState = useRef(getPlayState());
+  const [songId, setSongId] = useState("0");
+  const currentTime = useRef(0); // 当前播放时间
+  const [seekCounter, setSeekCounter] = useState(0); // 拖动进度条时修改触发重渲染
+  const [recalcCounter, setRecalcCounter] = useState(0); // 手动重计算时触发渲染
 
-  let [currentLine, setCurrentLine] = useState<any>(0);
-  const _currentLine = useRef<any>(0);
+  let [currentLine, setCurrentLine]: [number, (x: number) => void] =
+    useState(0);
+  const _currentLine = useRef(0);
   const _setCurrentLine = setCurrentLine;
-  setCurrentLine = (x: any) => {
-    _currentLine.current = x;
-    _setCurrentLine(x);
+  setCurrentLine = (prevState: number) => {
+    _currentLine.current = prevState;
+    _setCurrentLine(prevState);
+    return prevState;
   };
-  const [currentLineForScrolling, setCurrentLineForScrolling] =
-    useState<any>(0); // 为提前 0.2s 滚动，使滚动 delay 与逐词歌词对应 而设置的 提前的，仅用于滚动的 currentLine
+  const [currentLineForScrolling, setCurrentLineForScrolling] = useState(0); // 为提前 0.2s 滚动，使滚动 delay 与逐词歌词对应 而设置的 提前的，仅用于滚动的 currentLine
 
   const [globalOffset, setGlobalOffset, _globalOffset] = useRefState(
     parseInt(getSetting("lyric-offset", 0)),
   );
 
-  const heightOfItems = useRef<any>([]);
+  const heightOfItems = useRef<number[]>([]);
 
-  const [containerHeight, setContainerHeight] = useState<any>(0);
-  const [containerWidth, setContainerWidth] = useState<any>(0);
+  const [containerHeight, setContainerHeight] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
 
-  const [fontSize, setFontSize] = useState<any>(
-    getSetting("lyric-font-size", 32),
+  const [fontSize, setFontSize] = useState(
+    getSetting("lyric-font-size", 32) as number,
   );
-  const [lyricFade, setLyricFade] = useState<any>(
-    getSetting("lyric-fade", false),
+  const [lyricFade, setLyricFade] = useState(
+    getSetting("lyric-fade", false) as boolean,
   );
-  const [lyricZoom, setLyricZoom] = useState<any>(
-    getSetting("lyric-zoom", false),
+  const [lyricZoom, setLyricZoom] = useState(
+    getSetting("lyric-zoom", false) as boolean,
   );
-  const [lyricBlur, setLyricBlur] = useState<any>(
-    getSetting("lyric-blur", false),
+  const [lyricBlur, setLyricBlur] = useState(
+    getSetting("lyric-blur", false) as boolean,
   );
-  const [lyricRotate, setLyricRotate] = useState<any>(
-    getSetting("lyric-rotate", false),
+  const [lyricRotate, setLyricRotate] = useState(
+    getSetting("lyric-rotate", false) as boolean,
   );
-  const [RotateCurvature, setRotateCurvature] = useState<any>(
-    getSetting("lyric-rotate-curvature", 30),
+  const [RotateCurvature, setRotateCurvature] = useState(
+    getSetting("lyric-rotate-curvature", 30) as number,
   );
-  const [showTranslation, setShowTranslation] = useState<any>(
-    getSetting("show-translation", true),
+  const [showTranslation, setShowTranslation] = useState(
+    getSetting("show-translation", true) as boolean,
   );
-  const [showRomaji, setShowRomaji] = useState<any>(
-    getSetting("show-romaji", true),
+  const [showRomaji, setShowRomaji] = useState(
+    getSetting("show-romaji", true) as boolean,
   );
-  const [useKaraokeLyrics, setUseKaraokeLyrics] = useState<any>(
-    getSetting("use-karaoke-lyrics", true),
+  const [useKaraokeLyrics, setUseKaraokeLyrics] = useState(
+    getSetting("use-karaoke-lyrics", true) as boolean,
   );
-  const [karaokeAnimation, setKaraokeAnimation] = useState<any>(
-    getSetting("karaoke-animation", "float"),
+  const [karaokeAnimation, setKaraokeAnimation] = useState(
+    getSetting("karaoke-animation", "float") as string,
   );
   const [currentLyricAlignmentPercentage, setCurrentLyricAlignmentPercentage] =
-    useState<any>(
-      parseInt(getSetting("current-lyric-alignment-percentage", 50)),
-    );
-  const [lyricStagger, setLyricStagger] = useState<any>(
-    getSetting("lyric-stagger", true),
+    useState(parseInt(getSetting("current-lyric-alignment-percentage", 50)));
+  const [lyricStagger, setLyricStagger] = useState(
+    getSetting("lyric-stagger", true) as boolean,
   );
-  const [lyricGlow, setLyricGlow] = useState<any>(
-    getSetting("lyric-glow", true),
+  const [lyricGlow, setLyricGlow] = useState(
+    getSetting("lyric-glow", true) as boolean,
   );
 
-  const [overviewMode, setOverviewMode] = useState<any>(false);
-  const [overviewModeScrolling, setOverviewModeScrolling] =
-    useState<any>(false);
-  const exitOverviewModeScrollingTimeout = useRef<any>(null);
-  const overviewContainerRef = useRef<any>(null);
+  const [overviewMode, setOverviewMode] = useState(false);
+  const [overviewModeScrolling, setOverviewModeScrolling] = useState(false);
+  const exitOverviewModeScrollingTimeout = useRef<number>(null);
+  const overviewContainerRef = useRef<HTMLDivElement>(null);
 
-  const [lineTransforms, setLineTransforms] = useState<any>([]);
-  const shouldTransit = useRef<any>(true);
+  const [lineTransforms, setLineTransforms] = useState<Refine.LineTransform[]>(
+    [],
+  );
+  const shouldTransit = useRef(true);
 
   const [allToNonInterludeLyricsMapping, setAllToNonInterludeLyricsMapping] =
-    useState<any>([]); // 所有歌词 index -> 非间奏歌词 index (间奏歌词则是往前最近的非间奏歌词)
+    useState<number[]>([]); // 所有歌词 index -> 非间奏歌词 index (间奏歌词则是往前最近的非间奏歌词)
   const [nonInterludeToAllLyricsMapping, setNonInterludeToAllLyricsMapping] =
-    useState<any>([]); // 非间奏歌词 index -> 所有歌词 index
+    useState<number[]>([]); // 非间奏歌词 index -> 所有歌词 index
 
-  let [scrollingMode, setScrollingMode] = useState<any>(false);
-  const [scrollingFocusLine, setScrollingFocusLine] = useState<any>(0);
-  const _scrollingMode = useRef<any>(false);
-  const _scrollingFocusLine = useRef<any>(0);
-  const exitScrollingModeTimeout = useRef<any>(null);
+  let [scrollingMode, setScrollingMode]: [boolean, (x: boolean) => void] =
+    useState(false);
+  const [scrollingFocusLine, setScrollingFocusLine] = useState(0);
+  const _scrollingMode = useRef(false);
+  const _scrollingFocusLine = useRef(0);
+  const exitScrollingModeTimeout = useRef<number>(null);
   const _setScrollingMode = setScrollingMode;
-  setScrollingMode = (x: any) => {
+  setScrollingMode = (x: boolean) => {
     _scrollingMode.current = x;
-    if (x) containerRef.current.classList.add("scrolling");
-    else containerRef.current.classList.remove("scrolling");
+    if (x) containerRef.current!.classList.add("scrolling");
+    else containerRef.current!.classList.remove("scrolling");
     _setScrollingMode(x);
   };
 
-  const isPureMusic =
+  const isPureMusic: boolean =
     lyrics &&
     (lyrics.length === 1 ||
       (lyrics.length <= 10 &&
@@ -188,8 +189,8 @@ export function Lyrics(props: {
   const preProcessMapping = (lyrics: any) => {
     lyrics ??= [];
     // @ts-ignore
-    const allToNonInterlude: any[] = [],
-      nonInterludeToAll: any[] = [];
+    const allToNonInterlude: number[] = [],
+      nonInterludeToAll: number[] = [];
     let cnt = 0;
     for (let i = 0; i < lyrics.length; i++) {
       const line = lyrics[i];
@@ -262,9 +263,9 @@ export function Lyrics(props: {
   useEffect(() => {
     // Recalculate height of each line
     if (!lyrics) return;
-    const container = containerRef.current;
-    const items = container.children;
-    const heights = [];
+    const container = containerRef.current!;
+    const items = container.children as unknown as HTMLElement[];
+    const heights: number[] = [];
     for (const item of items) {
       heights.push(item.clientHeight);
     }
@@ -283,9 +284,9 @@ export function Lyrics(props: {
 
   const recalcHeightOfItems = () => {
     if (!lyrics) return;
-    const container = containerRef.current;
-    const items = container.children;
-    const heights = [];
+    const container = containerRef.current!;
+    const items = container.children as unknown as HTMLElement[];
+    const heights: number[] = [];
     for (const item of items) {
       heights.push(item.clientHeight);
     }
@@ -295,7 +296,7 @@ export function Lyrics(props: {
 
   const onResize = () => {
     shouldTransit.current = false;
-    const container = containerRef.current;
+    const container = containerRef.current!;
     setContainerHeight(container.clientHeight);
     setContainerWidth(container.clientWidth);
     //console.log('resize', container.clientWidth, container.clientHeight);
@@ -305,7 +306,7 @@ export function Lyrics(props: {
     const resizeObserver = new ResizeObserver(() => {
       onResize();
     });
-    resizeObserver.observe(containerRef.current);
+    resizeObserver.observe(containerRef.current!);
     //window.addEventListener("resize", onResize);
     return () => {
       //window.removeEventListener("resize", onResize);
@@ -323,13 +324,13 @@ export function Lyrics(props: {
     };
   }, []);
 
-  const previousFocusedLineRef = useRef<any>(0);
+  const previousFocusedLineRef = useRef(0);
   useEffect(() => {
     // Recalculate vertical positions and transforms of each line
     if (lyrics == null || lyrics == undefined) return;
 
     const space = fontSize * 1.2;
-    const delayByOffset = (offset: any) => {
+    const delayByOffset = (offset: number) => {
       //console.log(currentLine, previousFocusedLineRef.current);
       if (
         currentLineForScrolling == previousFocusedLineRef.current ||
@@ -345,7 +346,7 @@ export function Lyrics(props: {
       offset = Math.max(-4, Math.min(4, offset)) * sign + 4;
       return offset * 50;
     };
-    const scaleByOffset = (offset: any) => {
+    const scaleByOffset = (offset: number) => {
       if (!lyricZoom) return 1;
       if (customScaleFunc) {
         try {
@@ -358,7 +359,7 @@ export function Lyrics(props: {
       offset = Math.max(1 - offset * 0.2, 0);
       return offset * offset * offset /* offset*/ * 0.3 + 0.7;
     };
-    const blurByOffset = (offset: any) => {
+    const blurByOffset = (offset: number): number => {
       if (!lyricBlur || scrollingMode) return 0;
       if (customBlurFunc) {
         try {
@@ -371,7 +372,7 @@ export function Lyrics(props: {
       if (offset == 0) return 0;
       return Math.min(0.5 + 1 * offset, 4.5);
     };
-    const opacityByOffset = (offset: any) => {
+    const opacityByOffset = (offset: number): number => {
       if (!lyricFade || scrollingMode) return 1;
       if (customOpacityFunc) {
         try {
@@ -384,7 +385,21 @@ export function Lyrics(props: {
       if (offset <= 1) return 1;
       return Math.max(1 - 0.4 * (offset - 1), 0);
     };
-    const setRotateTransform = (line: any, yOffset: any, height: any) => {
+    const setRotateTransform = (
+      line: {
+        top: number;
+        scale: number;
+        delay: number;
+        blur?: number;
+        opacity?: number;
+        rotate?: number;
+        extraTop?: number;
+        left?: number;
+        outOfRangeHidden?: boolean;
+      },
+      yOffset: number,
+      height: number,
+    ) => {
       if (!lyricRotate) return;
       const origin = [-120 + (RotateCurvature - 25), -(yOffset + height / 2)];
       const len = Math.sqrt(origin[0] * origin[0] + origin[1] * origin[1]);
@@ -407,7 +422,14 @@ export function Lyrics(props: {
 
     //console.log(currentLine, previousFocusedLineRef.current, currentLine - previousFocusedLineRef.current > 0 ? 1 : -1);
 
-    const transforms = [];
+    const transforms: {
+      top: number;
+      scale: number;
+      delay: number;
+      blur?: number;
+      opacity?: number;
+      duration?: number;
+    }[] = [];
     for (let i = 0; i <= lyrics.length; i++)
       transforms.push({ top: 0, scale: 1, delay: 0 });
     //console.log('containerHeight', containerHeight);
@@ -440,14 +462,14 @@ export function Lyrics(props: {
 
     // 无论是否背景人声，都按照 visualCurrent 进行居中计算
     transforms[visualCurrent].top =
-      containerRef.current.clientHeight *
+      containerRef.current!.clientHeight *
         (currentLyricAlignmentPercentage * 0.01) -
       heightOfItems.current[visualCurrent] / 2;
 
     transforms[visualCurrent].scale = 1;
     transforms[visualCurrent].delay = delayByOffset(0);
-    (transforms as any)[visualCurrent].blur = blurByOffset(0);
-    (transforms as any)[visualCurrent].opacity = 1;
+    transforms[visualCurrent].blur = blurByOffset(0);
+    transforms[visualCurrent].opacity = 1;
 
     // 确保 visualCurrent 始终高亮，即使 isBGActive 为 true
     // 因为我们已经强制将 visualCurrent 设置为 transforms[visualCurrent] 的基础属性
@@ -472,8 +494,8 @@ export function Lyrics(props: {
       // 这符合逻辑：上一行主歌词应该开始衰减
 
       transforms[i].scale = scaleByOffset(effectiveOffset);
-      (transforms[i] as any).blur = blurByOffset(-effectiveOffset);
-      (transforms as any)[i].opacity = lyrics[i].isBG
+      transforms[i].blur = blurByOffset(-effectiveOffset);
+      transforms[i].opacity = lyrics[i].isBG
         ? 0
         : opacityByOffset(-effectiveOffset);
       let scaledHeight = lyrics[i].isBG
@@ -570,8 +592,8 @@ export function Lyrics(props: {
       }
 
       transforms[i].scale = scaleByOffset(effectiveOffset);
-      (transforms as any)[i].blur = blurByOffset(effectiveOffset);
-      (transforms[i] as any).opacity = opacityByOffset(effectiveOffset);
+      transforms[i].blur = blurByOffset(effectiveOffset);
+      transforms[i].opacity = opacityByOffset(effectiveOffset);
 
       transforms[i].delay = delayByOffset(i - visualCurrent);
       setRotateTransform(
@@ -584,10 +606,10 @@ export function Lyrics(props: {
     transforms[lyrics.length].scale = scaleByOffset(
       lyrics.length - 1 - visualCurrent,
     );
-    (transforms as any)[lyrics.length].blur = blurByOffset(
+    transforms[lyrics.length].blur = blurByOffset(
       lyrics.length - 1 - visualCurrent,
     );
-    (transforms as any)[lyrics.length].opacity = opacityByOffset(
+    transforms[lyrics.length].opacity = opacityByOffset(
       lyrics.length - 1 - visualCurrent,
     );
     if (lyrics.length > 0) {
@@ -600,9 +622,8 @@ export function Lyrics(props: {
         Math.min(space * 1.5, 90);
     } else {
       transforms[lyrics.length].top =
-        containerHeight / 2 -
-        (heightOfItems.current as any)[(lyrics as any).length] / 2;
-      (transforms[lyrics.length] as any).blur = blurByOffset(0);
+        containerHeight / 2 - heightOfItems.current[lyrics.length] / 2;
+      transforms[lyrics.length].blur = blurByOffset(0);
       transforms[lyrics.length].scale = scaleByOffset(0);
       // @ts-ignore
       transforms[lyrics.length].opacity = opacityByOffset(0);
@@ -621,8 +642,8 @@ export function Lyrics(props: {
     // for no transition when resizing, etc.
     if (!shouldTransit.current && !scrollingMode) {
       for (let i = 0; i <= lyrics.length; i++) {
-        (transforms as any)[i].delay = 0;
-        (transforms as any)[i].duration = 0;
+        transforms[i].delay = 0;
+        transforms[i].duration = 0;
       }
     }
     // reduce duration when scrolling
@@ -780,7 +801,7 @@ export function Lyrics(props: {
   }, []);
 
   const jumpToTime = useCallback(
-    (time: any) => {
+    (time: number) => {
       time -= _globalOffset.current;
       shouldTransit.current = true;
       setScrollingMode(false);
@@ -798,8 +819,13 @@ export function Lyrics(props: {
       setSeekCounter!(+new Date());
       if (!playState) {
         if (!isFM)
-          (document! as any).querySelector("#main-player .btnp").click();
-        else (document as any).querySelector(".m-player-fm .btnp").click();
+          (
+            document!.querySelector("#main-player .btnp")! as HTMLDivElement
+          ).click();
+        else
+          (
+            document.querySelector(".m-player-fm .btnp")! as HTMLDivElement
+          ).click();
       }
     },
     [songId, playState, globalOffset],
@@ -808,7 +834,7 @@ export function Lyrics(props: {
   // Scrolling mode
 
   const exitScrollingModeSoon = useCallback(
-    (timeout = 2500) => {
+    (timeout: number = 2500) => {
       cancelExitScrollingModeTimeout();
       if (!_playState.current) return;
       exitScrollingModeTimeout.current = setTimeout(() => {
@@ -828,7 +854,7 @@ export function Lyrics(props: {
     }
   }, []);
 
-  const scrollingFocusOnLine = useCallback((line: any) => {
+  const scrollingFocusOnLine = useCallback((line: number) => {
     if (line == null) return;
     shouldTransit.current = true;
     setScrollingMode(true);
@@ -836,7 +862,7 @@ export function Lyrics(props: {
     _scrollingFocusLine.current = line;
   }, []);
 
-  const onWheel = (e: any) => {
+  const onWheel = (e: WheelEvent) => {
     if (e.deltaY > 0) {
       for (
         let target = _scrollingFocusLine.current + 1;
@@ -866,18 +892,18 @@ export function Lyrics(props: {
   };
 
   useEffect(() => {
-    containerRef.current.addEventListener(
+    containerRef.current!.addEventListener(
       "scroll",
-      (e: any) => {
+      (e: Event) => {
         e.stopPropagation();
         e.preventDefault();
         return false;
       },
       { passive: false },
     );
-    containerRef.current.addEventListener(
+    containerRef.current!.addEventListener(
       "wheel",
-      (e: any) => {
+      (e: WheelEvent) => {
         e.stopPropagation();
         e.preventDefault();
         onWheel(e);
@@ -996,7 +1022,9 @@ export function Lyrics(props: {
     );
     if (!current) return;
     const scrollTop =
-      current.offsetTop - container.clientHeight / 2 + current.clientHeight / 2;
+      (current as HTMLDivElement).offsetTop -
+      container.clientHeight / 2 +
+      current.clientHeight / 2;
     container.scrollTop = scrollTop;
   }, [overviewMode, showRomaji, showTranslation]);
 
@@ -1010,7 +1038,9 @@ export function Lyrics(props: {
     );
     if (!current) return;
     const scrollTop =
-      current.offsetTop - container.clientHeight / 2 + current.clientHeight / 2;
+      (current as HTMLDivElement).offsetTop -
+      container.clientHeight / 2 +
+      current.clientHeight / 2;
     container.scrollTo({ top: scrollTop, behavior: "smooth" });
   }, [currentLine, overviewModeScrolling]);
 
@@ -1032,8 +1062,8 @@ export function Lyrics(props: {
     const container = overviewContainerRef.current;
     const selection = window.getSelection();
     const range = document.createRange();
-    (range as any).selectNodeContents(container);
-    (selection as any).removeAllRanges();
+    range.selectNodeContents(container!);
+    selection!.removeAllRanges();
     // @ts-ignore
     selection.addRange(range);
   }, [overviewContainerRef]);
@@ -1094,7 +1124,7 @@ export function Lyrics(props: {
               blur: 0,
             }
           }
-          contributors={lyricContributors}
+          contributors={lyricContributors!}
         />
       </div>
       <Scrollbar
@@ -1248,7 +1278,23 @@ export function Lyrics(props: {
   );
 }
 
-function Line(props: { isFM?: boolean; src?: string; [key: string]: any }) {
+function Line(props: {
+  id: number;
+  line: any;
+  currentLine: number;
+  currentTime: number;
+  seekCounter: number;
+  playState: boolean;
+  showTranslation: boolean;
+  showRomaji: boolean;
+  useKaraokeLyrics: boolean;
+  jumpToTime: (time: number) => void;
+  transforms: Refine.LineTransform;
+  karaokeAnimation: string;
+  outOfRangeScrolling: boolean;
+  outOfRangeKaraoke: boolean;
+  lyricGlow: boolean;
+}) {
   if (props.outOfRangeScrolling) {
     return (
       <div
@@ -1320,7 +1366,7 @@ function Line(props: { isFM?: boolean; src?: string; [key: string]: any }) {
     }
   };
 
-  const karaokeLineRef = useRef<any>(null);
+  const karaokeLineRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (props.currentLine != props.id) return;
     if (!karaokeLineRef.current) return;
@@ -1331,7 +1377,19 @@ function Line(props: { isFM?: boolean; src?: string; [key: string]: any }) {
     }, 6);
   }, [props.useKaraokeLyrics, props.seekCounter, props.karaokeAnimation]);
 
-  const glowAnimationsRef = useRef<any>([]);
+  const glowAnimationsRef = useRef<
+    {
+      animation: Animation;
+      timing: {
+        fadeIn: number;
+        keep: number;
+        fadeAway: number;
+        duration: number;
+        wordTime: any;
+        wordDuration: any;
+      };
+    }[]
+  >([]);
   useEffect(() => {
     if (!props.lyricGlow) return;
 
@@ -1462,7 +1520,7 @@ function Line(props: { isFM?: boolean; src?: string; [key: string]: any }) {
       // @ts-ignore
       offset={offset}
       onClick={() => props.jumpToTime(props.line.time + 50)}
-      onContextMenu={(e: any) => {
+      onContextMenu={(e) => {
         e.preventDefault();
         if (props.line.isInterlude || !props.line.originalLyric) return;
         let all = props.line.originalLyric;
@@ -1533,7 +1591,7 @@ function Line(props: { isFM?: boolean; src?: string; [key: string]: any }) {
               return (
                 <div
                   key={`${props.karaokeAnimation} ${index}`}
-                  ref={karaokeLineRef.current?.children[index]}
+                  ref={karaokeLineRef.current?.children[index] as any}
                   className={`rnp-karaoke-word ${word?.isCJK ? "is-cjk" : ""} ${word?.endsWithSpace ? "end-with-space" : ""}`}
                   style={getKaraokeAnimation(word)}
                 >
@@ -1584,23 +1642,26 @@ function Line(props: { isFM?: boolean; src?: string; [key: string]: any }) {
 }
 
 function Interlude(props: {
-  isFM?: boolean;
-  src?: string;
-  [key: string]: any;
+  id: number;
+  line: any;
+  currentLine: number;
+  currentTime: number;
+  seekCounter: number;
+  playState: boolean;
 }) {
-  const dotContainerRef = useRef<any>(null);
+  const dotContainerRef = useRef<HTMLDivElement>(null);
 
   const dotCount = 3;
   // @ts-ignore
   const perDotTime = parseInt(props.line.duration / dotCount);
-  const dots = [];
+  const dots: { time: number; duration: number }[] = [];
   for (let i = 0; i < dotCount; i++) {
     dots.push({
-      time: props.line.time + perDotTime * i,
+      time: (props.line.time as number) + perDotTime * i,
       duration: perDotTime,
     });
   }
-  const dotAnimation = (dot: any) => {
+  const dotAnimation = (dot: { time: number; duration: number }) => {
     if (dotContainerRef.current)
       dotContainerRef.current.classList.add("pause-breath");
     if (props.currentLine != props.id) {
@@ -1655,7 +1716,7 @@ function Interlude(props: {
       props.line.time + props.line.duration - props.currentTime - 375;
     if (timeUntilEnd > 0) {
       const timeout = setTimeout(() => {
-        setForceUpdate((v: any) => v + 1);
+        setForceUpdate((v: number) => v + 1);
       }, timeUntilEnd);
       return () => clearTimeout(timeout);
     }
@@ -1668,7 +1729,7 @@ function Interlude(props: {
 
   return (
     <div className="rnp-interlude-inner" ref={dotContainerRef}>
-      {dots.map((dot: any, index: number) => {
+      {dots.map((dot, index) => {
         return (
           <div
             key={index}
@@ -1682,9 +1743,8 @@ function Interlude(props: {
 }
 
 function Contributors(props: {
-  isFM?: boolean;
-  src?: string;
-  [key: string]: any;
+  transforms: Refine.LineTransform;
+  contributors: Refine.MayContributors;
 }) {
   const contributors = props.contributors;
   return (
@@ -1718,7 +1778,7 @@ function Contributors(props: {
   );
 }
 
-function Artist(props: { isFM?: boolean; src?: string; [key: string]: any }) {
+function Artist(props: { role: any }) {
   if (!props.role) {
     return null;
   }
@@ -1772,12 +1832,18 @@ function Contributor(props: {
   );
 }
 function Scrollbar(props: {
-  isFM?: boolean;
-  src?: string;
-  [key: string]: any;
+  nonInterludeToAll: number[];
+  allToNonInterlude: number[];
+  currentLine: number;
+  containerHeight: number;
+  scrollingMode: boolean;
+  scrollingFocusLine: number;
+  scrollingFocusOnLine: (line: number) => void;
+  exitScrollingModeSoon: (timeout?: number) => void;
+  overviewMode: boolean;
 }) {
-  const scrollbarRef = useRef<any>(null);
-  const thumbRef = useRef<any>(null);
+  const scrollbarRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLDivElement>(null);
 
   const currentLine = props.scrollingMode
     ? props.scrollingFocusLine
@@ -1789,26 +1855,30 @@ function Scrollbar(props: {
   const current = props.allToNonInterlude[currentLine];
 
   useEffect(() => {
-    const thumb = thumbRef.current;
+    const thumb = thumbRef.current!;
     const heightOfTrack = props.containerHeight - thumbHeight;
     const perStep = heightOfTrack / (totalSteps - 1);
     let dragging = false;
-    let startX: any, startY: any, offsetX: any, offsetY: any, trackTopY: any;
-    const onMouseDown = (e: any) => {
+    let startX: number,
+      startY: number,
+      offsetX: number,
+      offsetY: number,
+      trackTopY: number;
+    const onMouseDown = (e: MouseEvent) => {
       dragging = true;
       thumb.classList.add("dragging");
       thumb.style.transitionDuration = "0.2s";
-      thumb.style.transltionTimingFunction = "ease-out";
+      thumb.style.transitionTimingFunction = "ease-out";
       startX = e.clientX;
       startY = e.clientY;
       offsetX = e.offsetX;
       offsetY = e.offsetY;
-      trackTopY = scrollbarRef.current.getBoundingClientRect().top;
+      trackTopY = scrollbarRef.current!.getBoundingClientRect().top;
       document.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mouseup", onMouseUp);
     };
-    let lastFocusLine = props.current;
-    const onMouseMove = (e: any) => {
+    let lastFocusLine = current;
+    const onMouseMove = (e: MouseEvent) => {
       if (!dragging) return;
       const diffX = e.clientX - startX;
       let y = e.clientY - trackTopY - offsetY;
@@ -1829,12 +1899,12 @@ function Scrollbar(props: {
       //console.log(props.nonInterludeToAll[cloest]);
       props.scrollingFocusOnLine(props.nonInterludeToAll[cloest]);
     };
-    const onMouseUp = (e: any) => {
+    const onMouseUp = (e: MouseEvent) => {
       dragging = false;
       thumb.classList.remove("dragging");
       thumb.style.transitionDuration = "";
       //thumb.style.transform = `none`;
-      thumb.style.transltionTimingFunction = "";
+      thumb.style.transitionTimingFunction = "";
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
       props.exitScrollingModeSoon();
@@ -1844,7 +1914,7 @@ function Scrollbar(props: {
       dragging = false;
       thumb.classList.remove("dragging");
       thumb.style.transitionDuration = "";
-      thumb.style.transltionTimingFunction = "";
+      thumb.style.transitionTimingFunction = "";
       thumb.removeEventListener("mousedown", onMouseDown);
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
@@ -1871,9 +1941,15 @@ function Scrollbar(props: {
 }
 
 function LyricOverview(props: {
-  isFM?: boolean;
-  src?: string;
-  [key: string]: any;
+  lyrics: any;
+  currentLine: number;
+  showRomaji: boolean;
+  showTranslation: boolean;
+  jumpToTime: (t: number) => void;
+  isUnsynced: boolean;
+  overviewContainerRef: React.RefObject<HTMLDivElement | null>;
+  setOverviewModeScrolling: React.Dispatch<React.SetStateAction<boolean>>;
+  exitOverviewModeScrollingSoon: (timeout?: number) => void;
 }) {
   useEffect(() => {
     const container = props.overviewContainerRef.current;
@@ -1882,20 +1958,22 @@ function LyricOverview(props: {
       props.setOverviewModeScrolling(true);
       if (!selecting) props.exitOverviewModeScrollingSoon();
     };
-    const onMouseDown = (e: any) => {
+    const onMouseDown = (e: MouseEvent) => {
       if (e.button != 0) return;
-      const line = e.target.closest(".rnp-lyrics-overview-line");
+      const line = (e.target as unknown as HTMLDivElement).closest(
+        ".rnp-lyrics-overview-line",
+      );
       if (!line) return;
       selecting = true;
       props.setOverviewModeScrolling(true);
       document.addEventListener("mousemove", onMouseMove);
       document.addEventListener("mouseup", onMouseUp);
     };
-    const onMouseMove = (e: any) => {
+    const onMouseMove = (e: MouseEvent) => {
       if (!selecting) return;
       props.setOverviewModeScrolling(true);
     };
-    const onMouseUp = (e: any) => {
+    const onMouseUp = (e: MouseEvent) => {
       if (!selecting) return;
       selecting = false;
       props.setOverviewModeScrolling(true);
@@ -1903,11 +1981,11 @@ function LyricOverview(props: {
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     };
-    container.addEventListener("wheel", onWheel);
-    container.addEventListener("mousedown", onMouseDown);
+    container!.addEventListener("wheel", onWheel);
+    container!.addEventListener("mousedown", onMouseDown);
     return () => {
-      container.removeEventListener("wheel", onWheel);
-      container.removeEventListener("mousedown", onMouseDown);
+      container!.removeEventListener("wheel", onWheel);
+      container!.removeEventListener("mousedown", onMouseDown);
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     };
@@ -1935,7 +2013,7 @@ function LyricOverview(props: {
 							${index < props.currentLine ? "passed" : ""}
 							${line.isInterlude ? "interlude" : ""}
 						`}
-                onContextMenu={(e: any) => {
+                onContextMenu={(e) => {
                   e.preventDefault();
                   if (props.isUnsynced) return;
                   props.jumpToTime(line.time + 50);

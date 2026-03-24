@@ -15,14 +15,10 @@ import "./font-settings.scss";
 const useEffect = React.useEffect;
 const useState = React.useState;
 
-export function FontSettings(props: {
-  isFM?: boolean;
-  src?: string;
-  [key: string]: any;
-}) {
-  const [fontList, setFontList] = useState<any>([]);
-  const [fontFamily, setFontFamily] = useState<any>(
-    JSON.parse(getSetting("font-family", "[]")),
+export function FontSettings() {
+  const [fontList, setFontList] = useState<string[]>([]);
+  const [fontFamily, setFontFamily] = useState<string[]>(
+    JSON.parse(getSetting("font-family", "[]") as string),
   );
 
   useEffect(() => {
@@ -45,7 +41,7 @@ export function FontSettings(props: {
 			body.rnp-custom-font .g-single-track .lyric *,
 			body.rnp-custom-font .n-single .head *,
 			body.rnp-custom-font .m-fm > *:not(.fmcmt) * {
-				font-family: ${fontFamily.length ? fontFamily.map((font: any) => `'${font}'`).join(", ") : "inherit"} !important;
+				font-family: ${fontFamily.length ? fontFamily.map((font) => `'${font}'`).join(", ") : "inherit"} !important;
 			}
 		`;
     setSetting("font-family", JSON.stringify(fontFamily));
@@ -57,16 +53,16 @@ export function FontSettings(props: {
         <Autocomplete
           multiple
           value={fontFamily}
-          onChange={(event: any, newValue: any) => {
+          onChange={(event, newValue) => {
             setFontFamily(newValue);
           }}
           options={fontList}
-          getOptionLabel={(option: any) => option}
+          getOptionLabel={(option) => option}
           defaultValue={[]}
           fullWidth
           freeSolo
           forcePopupIcon={false}
-          renderInput={(params: any) => (
+          renderInput={(params) => (
             <TextField
               {...params}
               variant="outlined"
@@ -143,11 +139,13 @@ export function FontSettings(props: {
   );
 }
 function FontPreset(props: {
-  isFM?: boolean;
-  src?: string;
-  [key: string]: any;
+  fonts: string[];
+  name: string;
+  url: string;
+  fontList: string[];
+  setFontFamily: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
-  const hasFont = props.fonts.some((font: any) =>
+  const hasFont = props.fonts.some((font) =>
     props.fontList.includes(font),
   );
 

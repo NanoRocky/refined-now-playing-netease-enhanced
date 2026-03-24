@@ -41,19 +41,22 @@ export const waitForElementAsync = async (
   }
   return await betterncm.utils.waitForElement(selector);
 };
-export const getSetting = (option: string, defaultValue: any = ""): any => {
+export const getSetting = (
+  option: string,
+  defaultValue: number | boolean | string = "",
+): any | null => {
   if (option.endsWith("-fm")) {
     option = option.replace(/-fm$/, "");
   }
   option = "refined-now-playing-" + option;
-  let value = localStorage.getItem(option);
+  let value: any | null = localStorage.getItem(option);
   if (!value) {
     value = defaultValue;
   }
   if (value === "true") {
-    (value as any) = true;
+    value = true;
   } else if (value === ("false" as any)) {
-    (value as any) = false;
+    value = false;
   }
   return value;
 };
@@ -62,7 +65,7 @@ export const setSetting = (option: string, value: any): void => {
   localStorage.setItem(option, value);
 };
 export const chunk = <T,>(input: T[], size: number): T[][] => {
-  return input.reduce((arr: any, item: any, idx: number) => {
+  return input.reduce((arr: T[][], item: T, idx: number) => {
     return idx % size === 0
       ? [...arr, [item]]
       : [...arr.slice(0, -1), [...arr.slice(-1)[0], item]];

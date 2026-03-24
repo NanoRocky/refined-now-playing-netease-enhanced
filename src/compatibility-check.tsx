@@ -6,11 +6,12 @@ const useState = React.useState;
 const useEffect = React.useEffect;
 const useRef = React.useRef;
 
-function Wizard(props: { isFM?: boolean; src?: string; [key: string]: any }) {
-  const [isNCMOutdated, setIsNCMOutdated] = useState<any>(false);
-  const [isBetterNCMOutdated, setIsBetterNCMOutdated] = useState<any>(false);
-  const [isGPUDisabled, setIsGPUDisabled] = useState<any>(false);
-  const [isHijackDisabled, setIsHijackDisabled] = useState<any>(false);
+function Wizard() {
+  const [isNCMOutdated, setIsNCMOutdated] = useState<boolean>(false);
+  const [isBetterNCMOutdated, setIsBetterNCMOutdated] =
+    useState<boolean>(false);
+  const [isGPUDisabled, setIsGPUDisabled] = useState<boolean>(false);
+  const [isHijackDisabled, setIsHijackDisabled] = useState<boolean>(false);
 
   // @ts-ignore
   useEffect(async () => {
@@ -45,10 +46,10 @@ function Wizard(props: { isFM?: boolean; src?: string; [key: string]: any }) {
         (await betterncm.app.readConfig(
           "cc.microblock.betterncm.remove-disable-gpu",
         )) != "true" &&
-        (await new Promise((resolve: any, reject: any) => {
+        (await new Promise((resolve: (t: boolean) => void, reject: any) => {
           channel.call(
             "app.getLocalConfig",
-            (GpuAccelerationEnabled: any) => {
+            (GpuAccelerationEnabled: number) => {
               if (!~~GpuAccelerationEnabled) {
                 resolve(true);
               } else {
@@ -294,8 +295,8 @@ function Wizard(props: { isFM?: boolean; src?: string; [key: string]: any }) {
               text="跳过"
               disabledAfterDone={true}
               onClick={() => {
-                (document as any)!
-                  .querySelector("#refined-now-playing-wizard")
+                document!
+                  .querySelector("#refined-now-playing-wizard")!
                   .remove();
               }}
             />
@@ -304,8 +305,8 @@ function Wizard(props: { isFM?: boolean; src?: string; [key: string]: any }) {
               disabledAfterDone={true}
               onClick={() => {
                 localStorage.setItem("refined-now-playing-wizard-done", "true");
-                (document as any)!
-                  .querySelector("#refined-now-playing-wizard")
+                document!
+                  .querySelector("#refined-now-playing-wizard")!
                   .remove();
               }}
             />
@@ -316,9 +317,15 @@ function Wizard(props: { isFM?: boolean; src?: string; [key: string]: any }) {
   );
 }
 
-function Button(props: { isFM?: boolean; src?: string; [key: string]: any }) {
-  const [clicked, setClicked] = useState<any>(false);
-  const [disabled, setDisabled] = useState<any>(false);
+function Button(props: {
+  text: string;
+  disabledAfterDone: boolean;
+  onClick: () => void;
+  disabled?: boolean;
+  clickedText?: string;
+}) {
+  const [clicked, setClicked] = useState<boolean>(false);
+  const [disabled, setDisabled] = useState<boolean>(false);
   return (
     <button
       // @ts-ignore
@@ -352,7 +359,7 @@ export function compatibilityWizard(force = false) {
 }
 
 function HijackFailureNotice() {
-  const [clicked, setClicked] = useState<any>(false);
+  const [clicked, setClicked] = useState<boolean>(false);
 
   if (clicked) {
     return null;
@@ -382,7 +389,7 @@ function HijackFailureNotice() {
 
 export async function hijackFailureNoticeCheck() {
   if (
-    (await betterncm.app.getSucceededHijacks()).filter((x: any) =>
+    (await betterncm.app.getSucceededHijacks()).filter((x: string[]) =>
       x.includes("RefinedNowPlaying"),
     ).length > 0
   ) {

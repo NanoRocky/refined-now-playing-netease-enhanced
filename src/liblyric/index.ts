@@ -123,7 +123,7 @@ function alignLyrics(
         if (maxLen > 0 && similarity / maxLen < 0.2) {
           // 忽略高度相似的翻译
         } else {
-          (line as any)[key] = other.lyric;
+          line[key] = other.lyric;
         }
       } else {
         (line as any)[key] = other.lyric;
@@ -165,7 +165,7 @@ export function parseLyric(
   translated: string = "",
   roman: string = "",
   dynamic: string = "",
-): LyricLine[] {
+) {
   if (dynamic.trim().length === 0) {
     const result: LyricLine[] = parsePureLyric(original).map((v) => ({
       time: v.time,
@@ -262,7 +262,10 @@ export function parseLyric(
       //console.log(JSON.parse(JSON.stringify(originalLyrics)), JSON.parse(JSON.stringify(lyric)));
       return lyric;
     };
-    const attachLyricToDynamic = (lyric: LyricPureLine[], field: string) => {
+    const attachLyricToDynamic = (
+      lyric: LyricPureLine[],
+      field: "translatedLyric" | "romanLyric" | "rawLyric",
+    ) => {
       lyric.forEach((line, index) => {
         let targetIndex = 0;
         processed.forEach((v, index) => {
@@ -298,7 +301,7 @@ export function parseLyric(
             line.originalLyric as string,
             v.originalLyric as string,
           );
-          const weight = similarity * 1000 + ((v as any)[field] ? 1 : 0);
+          const weight = similarity * 1000 + (v[field] ? 1 : 0);
           //console.log("similarity", similarity, line.originalLyric, v.originalLyric);
           //console.log("weight", index, weight, line.originalLyric, v.originalLyric);
           if (weight < minWeight) {
@@ -327,11 +330,11 @@ export function parseLyric(
           }
         }
 
-        (target as any)[field] = (target as any)[field] || "";
-        if ((target as any)[field].length > 0) {
-          (target as any)[field] += " ";
+        target[field] = target[field] || "";
+        if (target[field].length > 0) {
+          target[field] += " ";
         }
-        (target as any)[field] += line.lyric;
+        target[field] += line.lyric;
       });
     };
 
@@ -636,13 +639,13 @@ export function processLyric(lyric: LyricLine[]): LyricLine[] {
   lyric.forEach((thisLyric, i, lyric) => {
     if (thisLyric.originalLyric.trim().length === 0) {
       const nextLyric = lyric[i + 1];
-      if (nextLyric && nextLyric.time - thisLyric.time > 5000 && !isSpace) {
-        result.push(thisLyric);
+      if (nextLyric && nextLyric.time! - thisLyric.time! > 5000 && !isSpace) {
+        result.push(thisLyric as LyricLine);
         isSpace = true;
       }
     } else {
       isSpace = false;
-      result.push(thisLyric);
+      result.push(thisLyric as LyricLine);
     }
   });
 
@@ -650,7 +653,7 @@ export function processLyric(lyric: LyricLine[]): LyricLine[] {
     result.shift();
   }
 
-  if (result[0]?.time > 5000) {
+  if (result[0]?.time! > 5000) {
     result.unshift({
       time: 500,
       duration: result[0]?.time - 500,

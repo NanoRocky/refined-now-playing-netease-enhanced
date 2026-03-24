@@ -8,22 +8,28 @@ const useState = React.useState;
 const useRef = React.useRef;
 
 function ContextMenu(props: {
-  isFM?: boolean;
-  src?: string;
-  [key: string]: any;
+  items: {
+    label: string;
+    callback: () => void;
+    divider?: boolean;
+    html?: string | TrustedHTML;
+  }[];
+  x: number;
+  y: number;
+  parent: HTMLDivElement;
 }) {
   // props:
   // items: [{html: '', label: '', callback: () => {}}, ...] // label or html is required, if both are provided, html will be used
   // x: number
   // y: number
-  const menuRef = useRef<any>(null);
-  const [position, setPosition] = useState<any>({
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<{ x: number; y: number }>({
     x: props.x ?? 0,
     y: props.y ?? 0,
   });
 
   useLayoutEffect(() => {
-    const menu = menuRef.current;
+    const menu = menuRef.current!;
     const { x, y } = position;
     const { width, height } = menu.getBoundingClientRect();
     const { innerWidth, innerHeight } = window;
@@ -65,28 +71,28 @@ function ContextMenu(props: {
   }, [position]);
 
   const closeMenu = useCallback(() => {
-    menuRef.current.animate([{ opacity: 1 }, { opacity: 0 }], {
+    menuRef.current!.animate([{ opacity: 1 }, { opacity: 0 }], {
       duration: 150,
       easing: "ease-out",
       fill: "forwards",
     }).onfinish = () => {
       ReactDOM.unmountComponentAtNode(menuRef.current);
-      menuRef.current.remove();
+      menuRef.current!.remove();
       props.parent.remove();
     };
   }, []);
 
   useEffect(() => {
-    menuRef.current.focus();
-    menuRef.current.addEventListener("blur", closeMenu);
+    menuRef.current!.focus();
+    menuRef.current!.addEventListener("blur", closeMenu);
     return () => {
-      menuRef.current.removeEventListener("blur", closeMenu);
+      menuRef.current!.removeEventListener("blur", closeMenu);
     };
   }, []);
 
   return (
     <div className="rnp-context-menu" tabIndex={0} ref={menuRef}>
-      {props.items.map((item: any, index: number) =>
+      {props.items.map((item, index) =>
         item.divider ? (
           <div className="rnp-context-menu-devider" key={index} />
         ) : (
@@ -112,7 +118,11 @@ function ContextMenu(props: {
   );
 }
 
-export function showContextMenu(x: number, y: number, items: any) {
+export function showContextMenu(
+  x: number,
+  y: number,
+  items: { label: string; callback: () => void }[],
+) {
   const div = document.createElement("div");
   document.body.appendChild(div);
   ReactDOM.render(<ContextMenu items={items} x={x} y={y} parent={div} />, div);
