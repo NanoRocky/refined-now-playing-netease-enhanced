@@ -103,5 +103,8 @@ typings/
 # TernJS port file
 .tern-port
 
+# Build output
+dist
+
 # TEMP files
-.tmp/
+.tmp

@@ -1,9 +1,11 @@
 {
     "manifest_version": 1,
     "name": "RefinedNowPlaying Enhanced",
-    "author": "NanoRocky, LaoShui, solstice23",
+    "slug": "RefinedNowPlaying-Enhanced",
+    "author": "NanoRocky, Pizero, LaoShui, solstice23",
     "author_links": [
         "https://github.com/NanoRocky",
+        "https://github.com/pizeroLOL",
         "https://github.com/laoshuikaixue",
         "https://github.com/solstice23"
     ],
