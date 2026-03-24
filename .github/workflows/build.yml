@@ -1,0 +1,54 @@
+name: Build Plugin
+
+on:
+    push:
+        branches: ["master", "main"]
+    pull_request:
+        branches: ["master", "main"]
+    workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v6
+
+            - name: Install pnpm
+              uses: pnpm/action-setup@v5
+              with:
+                  version: 10
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: "24.x"
+                  cache: "pnpm"
+
+            - name: Install dependencies
+              run: pnpm install
+
+            - name: Build plugin
+              run: pnpm run build
+
+            - name: Read plugin metadata
+              id: meta
+              run: |
+                  VERSION=$(jq -r '.version' public/manifest.json)
+                  SLUG=$(jq -r '.slug' public/manifest.json)
+                  echo "VERSION=$VERSION" >> $GITHUB_ENV
+                  echo "SLUG=$SLUG" >> $GITHUB_ENV
+
+            - name: Package to .plugin
+              run: |
+                  cd dist
+                  zip -qr "../${{ env.SLUG }}-${{ env.VERSION }}.plugin" ./*
+                  cd ..
+
+            - name: Upload Artifact
+              uses: actions/upload-artifact@v7
+              with:
+                  name: ${{ env.SLUG }}-${{ env.VERSION }}
+                  path: ${{ env.SLUG }}-${{ env.VERSION }}.plugin
+                  retention-days: 14
