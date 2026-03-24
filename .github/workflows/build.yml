@@ -1,5 +1,6 @@
 name: Build Plugin
-
+permissions:
+  contents: read
 on:
     push:
         branches: ["master", "main"]
