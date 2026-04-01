@@ -2,7 +2,7 @@ import * as React from "react";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { getSetting, setSetting } from "./utils";
+import { getSetting, setSetting } from "../utils/utils";
 
 const darkTheme = createTheme({
   palette: {

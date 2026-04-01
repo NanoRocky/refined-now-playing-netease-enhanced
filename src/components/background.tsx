@@ -1,6 +1,6 @@
 import React from "react";
 import "./background.scss";
-import { getGradientFromPalette } from "./color-utils";
+import { getGradientFromPalette } from "../utils/color-utils";
 import { getPaletteSync } from "colorthief";
 
 const useState = React.useState;

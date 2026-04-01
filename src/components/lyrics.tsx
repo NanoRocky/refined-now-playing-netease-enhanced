@@ -1,6 +1,6 @@
 import React from "react";
-import "./lyric-provider";
-import { getSetting, setSetting, copyTextToClipboard } from "./utils";
+import "../providers/lyric-provider";
+import { getSetting, setSetting, copyTextToClipboard } from "../utils/utils";
 import { showContextMenu } from "./context-menu";
 import "./lyrics.scss";
 
