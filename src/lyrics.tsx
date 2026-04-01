@@ -77,6 +77,10 @@ export function Lyrics(props: {
   const [hasRomaji, setHasRomaji] = useState<any>(false);
   const [hasKaraoke, setHasKaraoke] = useState<any>(false);
   const [isUnsynced, setIsUnsynced] = useState<any>(false); // 歌词不支持滚动
+  const [useCustomLyric, setUseCustomLyric] = useState<any>(
+    getSetting("use-custom-lyric", true),
+  );
+  const [isCustomLyricLoaded, setIsCustomLyricLoaded] = useState<any>(false);
 
   const [lyricContributors, setLyricContributors] = useState<any>(null);
 
@@ -1229,6 +1233,42 @@ export function Lyrics(props: {
           }}
         >
           逐
+        </button>
+        <button
+          className={`rnp-lyrics-switch-btn
+						${(window as any).isCustomLyricLoaded && useCustomLyric ? "active" : ""}
+					`}
+          title="导入自定义歌词"
+          onClick={() => {
+            if ((window as any).isCustomLyricLoaded && useCustomLyric) {
+              setUseCustomLyric(false);
+              setSetting("use-custom-lyric", false);
+              window.onProcessLyrics(
+                (window as any).lastRawLyrics,
+                (window as any).lastSongID,
+                true,
+              );
+            } else {
+              const url = prompt(
+                "请输入您想导入的歌词链接？(支持 LRC / YRC / TTML / QRC)",
+              );
+              if (url) {
+                setSetting(
+                  `use-custom-lyric-${betterncm.ncm.getPlaying().id}`,
+                  url,
+                );
+                setSetting("use-custom-lyric", true);
+                setUseCustomLyric(true);
+                window.onProcessLyrics(
+                  (window as any).lastRawLyrics,
+                  (window as any).lastSongID,
+                  true,
+                );
+              }
+            }
+          }}
+        >
+          导
         </button>
       </div>
       {(overviewMode || isUnsynced) && (
