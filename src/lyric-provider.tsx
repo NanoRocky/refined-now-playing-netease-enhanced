@@ -127,6 +127,10 @@ window.onProcessLyrics = (_rawLyrics: any, songID: any) => {
         console.log("Using Fallback Lyrics");
       }
 
+      if (betterncm.ncm.getPlaying().id !== playingId) {
+        return;
+      }
+
       const processedLyrics = await processLyrics(processedLyricsToUse);
       const lyrics = {
         lyrics: processedLyrics,
