@@ -14,9 +14,16 @@ const processLyrics = (lyrics: any) => {
 let currentRawLRC: any = null;
 
 const _onProcessLyrics = window.onProcessLyrics ?? ((x: any) => x);
-window.onProcessLyrics = (_rawLyrics: any, songID: any) => {
+window.onProcessLyrics = (
+  _rawLyrics: any,
+  songID: any,
+  forceRefresh = false,
+) => {
   if (!_rawLyrics || _rawLyrics?.data === -400)
     return _onProcessLyrics(_rawLyrics, songID);
+
+  (window as any).lastRawLyrics = _rawLyrics;
+  (window as any).lastSongID = songID;
 
   let rawLyrics = _rawLyrics;
   // 本地歌词处理
@@ -31,8 +38,10 @@ window.onProcessLyrics = (_rawLyrics: any, songID: any) => {
     };
   }
 
-  if ((rawLyrics?.lrc?.lyric ?? "") != currentRawLRC) {
-    console.log("Update Raw Lyrics", rawLyrics);
+  if ((rawLyrics?.lrc?.lyric ?? "") != currentRawLRC || forceRefresh) {
+    if (forceRefresh) console.log("Force refreshing lyrics");
+    else console.log("Update Raw Lyrics", rawLyrics);
+
     currentRawLRC = rawLyrics?.lrc?.lyric ?? "";
     setTimeout(async () => {
       let processedLyricsToUse = null;
@@ -40,6 +49,43 @@ window.onProcessLyrics = (_rawLyrics: any, songID: any) => {
       const enableAMLL = getSetting("enable-amll", true);
       const amllFastSource = getSetting("amll-fast-source", false);
       const playingId = betterncm.ncm.getPlaying().id;
+
+      const enableCustomLyric = getSetting("use-custom-lyric", false);
+      const customLyricUrl = getSetting(`use-custom-lyric-${playingId}`, "");
+
+      if (!processedLyricsToUse && enableCustomLyric && customLyricUrl) {
+        try {
+          console.log("Fetching custom lyric from", customLyricUrl);
+          const customResponse = await fetch(customLyricUrl);
+          const customText = await customResponse.text();
+          const approxLines = customText.split("\n").length;
+          if (customText.includes("<tt") || customText.includes("<?xml")) {
+            processedLyricsToUse = parseAMLLTTML(customText);
+          } else if (
+            customText.match(/\[\d+,\d+\]/) &&
+            customText.match(/\(\d+,\d+(?:,\d+)?\)/)
+          ) {
+            const parsed = parseLyric(customText, "", "", customText);
+            if (parsed && parsed.length > 0) {
+              processedLyricsToUse = parsed;
+            }
+          } else {
+            const parsed = parseLyric(customText, "", "", "");
+            if (parsed && parsed.length > 0) {
+              processedLyricsToUse = parsed;
+            }
+          }
+          if (processedLyricsToUse) {
+            console.log("Using Custom Lyric");
+            (window as any).isCustomLyricLoaded = true;
+          }
+        } catch (e) {
+          console.log("Failed to load custom lyric", e);
+          (window as any).isCustomLyricLoaded = false;
+        }
+      } else {
+        (window as any).isCustomLyricLoaded = false;
+      }
 
       const translation =
         rawLyrics?.ytlrc?.lyric ??
@@ -56,7 +102,7 @@ window.onProcessLyrics = (_rawLyrics: any, songID: any) => {
       const approxLines = originalLRCStr.match(/\[(.*?)\]/g)?.length ?? 0;
 
       // 1. 网易云音乐内置逐字 yrc
-      if (dynamic) {
+      if (!processedLyricsToUse && dynamic) {
         const parsed = parseLyric(originalLRCStr, translation, roma, dynamic);
         if (approxLines - parsed.length <= approxLines * 0.7) {
           processedLyricsToUse = parsed;

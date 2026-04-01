@@ -467,7 +467,9 @@ export function parseLyric(
 
 const yrcLineRegexp = /^\[(?<time>[0-9]+),(?<duration>[0-9]+)\](?<line>.*)/;
 const yrcWordTimeRegexp =
-  /^\((?<time>[0-9]+),(?<duration>[0-9]+),(?<flag>[0-9]+)\)(?<word>[^\(]*)/;
+  /^\((?<time>[0-9]+),(?<duration>[0-9]+)(?:,(?<flag>[0-9]+))?\)(?<word>[^\(]*)/;
+const qrcWordTimeRegexp =
+  /^(?<word>[^\(]*)\((?<time>[0-9]+),(?<duration>[0-9]+)(?:,(?<flag>[0-9]+))?\)/;
 const timeRegexp = /^\[((?<min>[0-9]+):)?(?<sec>[0-9]+([\.:]([0-9]+))?)\]/;
 const metaTimeRegexp =
   /^\[((?<min>[0-9]+):)?(?<sec>[0-9]+([\.:]([0-9]+))?)\-(?<discriminator>[0-9]+)\]/; //[00:00.00-1] 作词 : xxx
@@ -547,7 +549,11 @@ export function parsePureDynamicLyric(lyric: string): LyricLine[] {
       tmp = lineMatches.groups?.line || "";
       const words: DynamicLyricWord[] = [];
       while (tmp.length > 0) {
-        const wordMatches = tmp.match(yrcWordTimeRegexp);
+        const timeBeforeText = /^\(\d+,\d+(?:,\d+)?\)/.test(tmp);
+        const regexpToUse = timeBeforeText
+          ? yrcWordTimeRegexp
+          : qrcWordTimeRegexp;
+        const wordMatches = tmp.match(regexpToUse);
         if (wordMatches) {
           const wordTime = parseInt(wordMatches.groups?.time || "0");
           const wordDuration = parseInt(wordMatches.groups?.duration || "0");
