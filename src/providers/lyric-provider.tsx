@@ -1,5 +1,5 @@
-import { parseLyric } from "./liblyric/index";
-import { cyrb53, getSetting } from "./utils";
+import { parseLyric } from "../liblyric/index";
+import { cyrb53, getSetting } from "../utils/utils";
 import { fetchAMLL, parseAMLLTTML } from "./amll-provider";
 
 const processLyrics = (lyrics: any) => {

@@ -1,7 +1,7 @@
 import React from "react";
 import "./whats-new.scss";
 import changeLog from "./whats-new.json";
-import { getPlugin } from "./utils";
+import { getPlugin } from "../utils/utils";
 
 import { compareVersions } from "compare-versions";
 

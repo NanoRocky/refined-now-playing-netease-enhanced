@@ -1,5 +1,5 @@
 import React from "react";
-import { getSetting } from "./utils";
+import { getSetting } from "../utils/utils";
 const useState = React.useState;
 const useEffect = React.useEffect;
 

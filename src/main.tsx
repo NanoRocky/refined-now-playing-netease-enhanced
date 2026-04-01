@@ -1,10 +1,10 @@
-import "./styles.scss";
-import "./exclusive-modes.scss";
-import "./FM.scss";
-import "./experimental.scss";
-import settingsMenuHTML from "./settings-menu.html?raw";
-import "./settings-menu.scss";
-import { argb2Rgb, rgb2Argb } from "./color-utils";
+import "./styles/styles.scss";
+import "./styles/exclusive-modes.scss";
+import "./styles/FM.scss";
+import "./styles/experimental.scss";
+import settingsMenuHTML from "./components/settings-menu.html?raw";
+import "./components/settings-menu.scss";
+import { argb2Rgb, rgb2Argb } from "./utils/color-utils";
 import {
   waitForElement,
   waitForElementAsync,
@@ -13,11 +13,11 @@ import {
   chunk,
   copyTextToClipboard,
   getPlugin,
-} from "./utils";
-import "./refined-control-bar";
-import { Background } from "./background";
-import { CoverShadow } from "./cover-shadow";
-import { Lyrics } from "./lyrics";
+} from "./utils/utils";
+import "./components/refined-control-bar";
+import { Background } from "./components/background";
+import { CoverShadow } from "./components/cover-shadow";
+import { Lyrics } from "./components/lyrics";
 import {
   themeFromSourceColor,
   QuantizerCelebi,
@@ -27,13 +27,13 @@ import {
 import {
   compatibilityWizard,
   hijackFailureNoticeCheck,
-} from "./compatibility-check";
-import { whatsNew } from "./whats-new";
-import { showContextMenu } from "./context-menu";
-import { MiniSongInfo } from "./mini-song-info";
-import { ProgressbarPreview } from "./progressbar-preview";
-import { FontSettings } from "./font-settings";
-import "./material-you-compatibility.scss";
+} from "./utils/compatibility-check";
+import { whatsNew } from "./components/whats-new";
+import { showContextMenu } from "./components/context-menu";
+import { MiniSongInfo } from "./components/mini-song-info";
+import { ProgressbarPreview } from "./components/progressbar-preview";
+import { FontSettings } from "./components/font-settings";
+import "./styles/material-you-compatibility.scss";
 
 const updateAccentColor = (name: any, argb: any, isFM = false) => {
   const [r, g, b] = [...argb2Rgb(argb)];

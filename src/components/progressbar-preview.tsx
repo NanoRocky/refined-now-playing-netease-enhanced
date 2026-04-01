@@ -1,6 +1,6 @@
 import React from "react";
 import "./progressbar-preview.scss";
-import { getSetting } from "./utils";
+import { getSetting } from "../utils/utils";
 
 const isFMSession = () => {
   return !(document as any)!

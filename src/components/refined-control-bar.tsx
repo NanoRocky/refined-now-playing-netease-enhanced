@@ -1,7 +1,7 @@
 // code from material you theme
 
 import "./refined-control-bar.scss";
-import { waitForElement, getSetting, setSetting } from "./utils";
+import { waitForElement, getSetting, setSetting } from "../utils/utils";
 
 const injectHTML = (
   type: any,

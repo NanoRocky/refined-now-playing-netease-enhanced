@@ -1,4 +1,4 @@
-import { processLyric } from "./liblyric/index";
+import { processLyric } from "../liblyric/index";
 
 const amllDbServer =
   "https://raw.githubusercontent.com/amll-dev/amll-ttml-db/refs/heads/main/ncm-lyrics/%s.%e";
