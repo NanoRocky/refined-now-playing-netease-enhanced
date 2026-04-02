@@ -1170,6 +1170,9 @@ new MutationObserver(() => {
   }
 }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
 
+import { injectV2 } from "./injects/inject";
+import { injectV3 } from "./injects/v3/inject";
+
 // intercept src setter of HTMLImageElement
 const _src = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src");
 Object.defineProperty(HTMLImageElement!.prototype, "src", {
@@ -1210,157 +1213,27 @@ plugin.onLoad(async (p: any) => {
     document.body.classList.add("no-material-you-theme");
   }
 
-  new MutationObserver(async () => {
-    // Now playing page
-    if (document!.querySelector(".g-single:not(.patched)")) {
-      // @ts-ignore
-      document.querySelector(".g-single").classList.add("patched");
-      waitForElement(".n-single .cdimg img", (dom: HTMLElement | any) => {
-        dom.addEventListener("load", updateCDImage);
-        new MutationObserver(updateCDImage).observe(dom, {
-          attributes: true,
-          attributeFilter: ["src"],
-        });
-
-        dom.addEventListener("contextmenu", (e: any) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const imageURL = dom.src
-            .replace(/^orpheus:\/\/cache\/\?/, "")
-            .replace(/\?.*$/, "");
-          showContextMenu(e.clientX, e.clientY, [
-            {
-              label: "复制图片地址",
-              callback: () => {
-                copyTextToClipboard(imageURL);
-              },
-            },
-            {
-              label: "在浏览器中打开图片",
-              callback: () => {
-                betterncm.app.exec(`${imageURL}`);
-              },
-            },
-          ]);
-        });
-      });
-
-      waitForElement(
-        ".g-single .g-singlec-ct .n-single .mn .head .inf",
-        (dom: HTMLElement | any) => {
-          const addCopySelectionToItems = (items: any, closetSelector: any) => {
-            const selection = (window! as any).getSelection();
-            if (
-              selection.toString().trim() &&
-              selection.baseNode.parentElement.closest(closetSelector)
-            ) {
-              const selectedText = selection.toString().trim();
-              items.unshift({
-                label: "复制",
-                callback: () => {
-                  copyTextToClipboard(selectedText);
-                },
-              });
-            }
-          };
-          dom.addEventListener("contextmenu", (e: any) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            if (e.target.closest(".title .name")) {
-              const songName = dom.querySelector(".title .name").innerText;
-              const items = [
-                {
-                  label: "复制歌曲名",
-                  callback: () => {
-                    copyTextToClipboard(songName);
-                  },
-                },
-              ];
-              addCopySelectionToItems(items, ".title .name");
-              showContextMenu(e.clientX, e.clientY, items);
-              return;
-            }
-
-            if (e.target.closest(".info .alias")) {
-              const songAlias = dom.querySelector(".info .alias").innerText;
-              const items = [
-                {
-                  label: "复制歌曲别名",
-                  callback: () => {
-                    copyTextToClipboard(songAlias);
-                  },
-                },
-              ];
-              addCopySelectionToItems(items, ".info .alias");
-              showContextMenu(e.clientX, e.clientY, items);
-              return;
-            }
-          });
-        },
-      );
-
-      const background = document.createElement("div");
-      background.classList.add("rnp-bg");
-      ReactDOM.render(
-        <Background
-          type={getSetting("background-type", "fluid")}
-          image={await waitForElementAsync!(".n-single .cdimg img" as any)}
-        />,
-        background,
-      );
-      // @ts-ignore
-      document.querySelector(".g-single").appendChild(background);
-
-      const coverShadowController = document.createElement("div");
-      coverShadowController.classList.add("rnp-cover-shadow-controller");
-      ReactDOM.render(
-        <CoverShadow
-          image={await waitForElementAsync(".n-single .cdimg img")}
-        />,
-        coverShadowController,
-      );
-      document.body.appendChild(coverShadowController);
-
-      waitForElement(
-        ".g-single-track .g-singlec-ct .n-single .mn .lyric",
-        (oldLyrics: any) => {
-          oldLyrics.remove();
-        },
-      );
-      const lyrics = document.createElement("div");
-      lyrics.classList.add("lyric");
-      ReactDOM.render(<Lyrics />, lyrics);
-      waitForElement(
-        ".g-single-track .g-singlec-ct .n-single .wrap",
-        (dom: HTMLElement | any) => {
-          dom.appendChild(lyrics);
-        },
-      );
-
-      const miniSongInfo = document.createElement("div");
-      miniSongInfo.classList.add("rnp-mini-song-info");
-      setTimeout(async () => {
-        ReactDOM.render(
-          <MiniSongInfo
-            image={await waitForElementAsync(".n-single .cdimg img")}
-            infContainer={await waitForElementAsync(
-              ".g-single .g-singlec-ct .n-single .mn .head .inf" as any,
-            )}
-          />,
-          miniSongInfo,
-        );
-        // @ts-ignore
-        document.querySelector(".g-single").appendChild(miniSongInfo);
-      }, 0);
-
-      addSettingsMenu();
-      // @ts-ignore
-      addFullScreenButton(document.querySelector(".g-single"));
-
-      whatsNew();
-    }
-  }).observe(document.body, { childList: true });
+  // 区分并加载网易云版本
+  // @ts-ignore
+  const ncmVersion =
+    typeof betterncm !== "undefined" ? betterncm.ncm.getNCMVersion() : "";
+  if (ncmVersion.startsWith("3.")) {
+    console.log("[RNP] Loading v3 inject logic...");
+    injectV3(
+      updateCDImage,
+      addSettingsMenu,
+      addFullScreenButton,
+      calcAccentColor,
+    );
+  } else {
+    console.log("[RNP] Loading v2 inject logic...");
+    injectV2(
+      updateCDImage,
+      addSettingsMenu,
+      addFullScreenButton,
+      calcAccentColor,
+    );
+  }
 
   new MutationObserver(() => {
     recalculateTitleSize();
@@ -1423,67 +1296,6 @@ plugin.onLoad(async (p: any) => {
       }
     }
   }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
-
-  // 私人 FM
-  const patchFM = async () => {
-    if (
-      document!.querySelector("#page_pc_userfm_songplay:not(.patched)" as any)
-    ) {
-      // @ts-ignore
-      document
-        .querySelector("#page_pc_userfm_songplay")
-        .classList.add("patched");
-      FMObserver.disconnect();
-
-      const lyrics = document!.createElement("div" as any);
-      lyrics.classList.add("lyric");
-      // @ts-ignore
-      document.querySelector("#page_pc_userfm_songplay").appendChild(lyrics);
-      ReactDOM.render(<Lyrics isFM={true} />, lyrics);
-      for (let i = 0; i < 15; i++) {
-        setTimeout(() => {
-          window.dispatchEvent(new Event("resize"));
-        }, 200 * i);
-      }
-
-      const background = document.createElement("div");
-      background.classList.add("rnp-bg", "fm-bg");
-      ReactDOM.render(
-        <Background
-          type={getSetting("background-type", "fluid")}
-          image={await waitForElementAsync(
-            "#page_pc_userfm_songplay .fmplay .covers",
-          )}
-          isFM={true}
-          imageChangedCallback={(dom: HTMLElement | any) => {
-            if (!dom) return;
-            (calcAccentColor as any)!(dom, true);
-          }}
-        />,
-        background,
-      );
-      // @ts-ignore
-      document
-        .querySelector("#page_pc_userfm_songplay")
-        .appendChild(background);
-      addSettingsMenu(true);
-    }
-  };
-  let FMObserver = new MutationObserver(patchFM);
-  window.addEventListener("hashchange", async () => {
-    if (!window.location.hash.startsWith("#/m/fm/")) {
-      FMObserver.disconnect();
-      return;
-    }
-    for (let i = 0; i < 10; i++) {
-      setTimeout(() => {
-        window.dispatchEvent(new Event("recalc-lyrics"));
-        window.dispatchEvent(new Event("recalc-title"));
-      }, 50 * i);
-    }
-    FMObserver.observe(document.body, { childList: true });
-    window.dispatchEvent(new Event("recalc-lyrics"));
-  });
 
   // Listen system theme change
   const toggleSystemDarkmodeClass = (media: any) => {

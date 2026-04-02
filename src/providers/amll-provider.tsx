@@ -19,7 +19,7 @@ export const fetchAMLL = async (
     const textContent = await response.text();
     return textContent;
   } catch (e: any) {
-    console.error(`AMLL fetch error for ${ext}`, e);
+    console.error(`[RNP] AMLL fetch error for ${ext}`, e);
     return null;
   }
 };
@@ -345,7 +345,7 @@ const parseTTML = (ttmlContent: any) => {
 
     return lines.sort((a: any, b: any) => a.startTime - b.startTime);
   } catch (e: any) {
-    console.error("TTML Parse Error", e);
+    console.error("[RNP] TTML Parse Error", e);
     return [];
   }
 };
