@@ -355,7 +355,7 @@ export function Lyrics(props: {
         try {
           return customScaleFunc(offset);
         } catch (e: any) {
-          console.error("Error in custom scale function", e);
+          console.error("[RNP] Error in custom scale function", e);
         }
       }
       offset = Math.abs(offset);
@@ -368,7 +368,7 @@ export function Lyrics(props: {
         try {
           return customBlurFunc(offset);
         } catch (e: any) {
-          console.error("Error in custom blur function", e);
+          console.error("[RNP] Error in custom blur function", e);
         }
       }
       offset = Math.abs(offset);
@@ -381,7 +381,7 @@ export function Lyrics(props: {
         try {
           return customOpacityFunc(offset);
         } catch (e: any) {
-          console.error("Error in custom opacity function", e);
+          console.error("[RNP] Error in custom opacity function", e);
         }
       }
       offset = Math.abs(offset);

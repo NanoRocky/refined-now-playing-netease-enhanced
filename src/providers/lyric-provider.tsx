@@ -39,8 +39,8 @@ window.onProcessLyrics = (
   }
 
   if ((rawLyrics?.lrc?.lyric ?? "") != currentRawLRC || forceRefresh) {
-    if (forceRefresh) console.log("Force refreshing lyrics");
-    else console.log("Update Raw Lyrics", rawLyrics);
+    if (forceRefresh) console.log("[RNP] Force refreshing lyrics");
+    else console.log("[RNP] Update Raw Lyrics", rawLyrics);
 
     currentRawLRC = rawLyrics?.lrc?.lyric ?? "";
     setTimeout(async () => {
@@ -55,7 +55,7 @@ window.onProcessLyrics = (
 
       if (!processedLyricsToUse && enableCustomLyric && customLyricUrl) {
         try {
-          console.log("Fetching custom lyric from", customLyricUrl);
+          console.log("[RNP] Fetching custom lyric from", customLyricUrl);
           const customResponse = await fetch(customLyricUrl);
           const customText = await customResponse.text();
           const approxLines = customText.split("\n").length;
@@ -76,11 +76,11 @@ window.onProcessLyrics = (
             }
           }
           if (processedLyricsToUse) {
-            console.log("Using Custom Lyric");
+            console.log("[RNP] Using Custom Lyric");
             (window as any).isCustomLyricLoaded = true;
           }
         } catch (e) {
-          console.log("Failed to load custom lyric", e);
+          console.log("[RNP] Failed to load custom lyric", e);
           (window as any).isCustomLyricLoaded = false;
         }
       } else {
@@ -106,7 +106,7 @@ window.onProcessLyrics = (
         const parsed = parseLyric(originalLRCStr, translation, roma, dynamic);
         if (approxLines - parsed.length <= approxLines * 0.7) {
           processedLyricsToUse = parsed;
-          console.log("Using Netease YRC Lyrics");
+          console.log("[RNP] Using Netease YRC Lyrics");
         }
       }
 
@@ -121,7 +121,7 @@ window.onProcessLyrics = (
           const parsed = parseAMLLTTML(ttmlText);
           if (parsed && parsed.length > 0) {
             processedLyricsToUse = parsed;
-            console.log("Using AMLL TTML Lyrics");
+            console.log("[RNP] Using AMLL TTML Lyrics");
           }
         }
       }
@@ -137,7 +137,7 @@ window.onProcessLyrics = (
           const parsed = parseLyric(originalLRCStr, translation, roma, yrcText);
           if (parsed && parsed.length > 0) {
             processedLyricsToUse = parsed;
-            console.log("Using AMLL YRC Lyrics");
+            console.log("[RNP] Using AMLL YRC Lyrics");
           }
         }
       }
@@ -147,7 +147,7 @@ window.onProcessLyrics = (
         const parsed = parseLyric(originalLRCStr, translation, roma);
         if (parsed && parsed.length > 0) {
           processedLyricsToUse = parsed;
-          console.log("Using Netease LRC Lyrics");
+          console.log("[RNP] Using Netease LRC Lyrics");
         }
       }
 
@@ -162,7 +162,7 @@ window.onProcessLyrics = (
           const parsed = parseLyric(lrcText, translation, roma);
           if (parsed && parsed.length > 0) {
             processedLyricsToUse = parsed;
-            console.log("Using AMLL LRC Lyrics");
+            console.log("[RNP] Using AMLL LRC Lyrics");
           }
         }
       }
@@ -170,7 +170,7 @@ window.onProcessLyrics = (
       // Fallback
       if (!processedLyricsToUse) {
         processedLyricsToUse = parseLyric(originalLRCStr, translation, roma);
-        console.log("Using Fallback Lyrics");
+        console.log("[RNP] Using Fallback Lyrics");
       }
 
       if (betterncm.ncm.getPlaying().id !== playingId) {
@@ -241,10 +241,10 @@ window.onProcessLyrics = (
       (lyrics as any).hash =
         `${betterncm.ncm.getPlaying().id}-${cyrb53(processedLyrics.map((x: any) => x.originalLyric).join("\\"))}`;
       window.currentLyrics = lyrics;
-      console.group("Update Processed Lyrics");
-      console.log("lyrics", window.currentLyrics.lyrics);
-      console.log("contributors", window.currentLyrics.contributors);
-      console.log("hash", window.currentLyrics.hash);
+      console.group("[RNP] Update Processed Lyrics");
+      console.log("[RNP] lyrics", window.currentLyrics.lyrics);
+      console.log("[RNP] contributors", window.currentLyrics.contributors);
+      console.log("[RNP] hash", window.currentLyrics.hash);
       console.groupEnd();
       document.dispatchEvent(
         new CustomEvent("lyrics-updated", { detail: window.currentLyrics }),

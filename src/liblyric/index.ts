@@ -299,8 +299,8 @@ export function parseLyric(
             v.originalLyric as string,
           );
           const weight = similarity * 1000 + ((v as any)[field] ? 1 : 0);
-          //console.log("similarity", similarity, line.originalLyric, v.originalLyric);
-          //console.log("weight", index, weight, line.originalLyric, v.originalLyric);
+          //console.log("[RNP] similarity", similarity, line.originalLyric, v.originalLyric);
+          //console.log("[RNP] weight", index, weight, line.originalLyric, v.originalLyric);
           if (weight < minWeight) {
             minWeight = weight;
             targetIndex = index;
@@ -339,13 +339,13 @@ export function parseLyric(
     const romanParsed = attachOriginalLyric(parsePureLyric(roman));
     const rawParsed = attachOriginalLyric(parsePureLyric(original));
 
-    //console.log("translatedParsed", JSON.parse(JSON.stringify(translatedParsed)));
+    //console.log("[RNP] translatedParsed", JSON.parse(JSON.stringify(translatedParsed)));
 
     attachLyricToDynamic(translatedParsed, "translatedLyric");
     attachLyricToDynamic(romanParsed, "romanLyric");
     attachLyricToDynamic(rawParsed, "rawLyric");
 
-    //console.log("processed", JSON.parse(JSON.stringify(processed)));
+    //console.log("[RNP] processed", JSON.parse(JSON.stringify(processed)));
 
     // 插入空行
     for (let i = 0; i < processed.length; i++) {

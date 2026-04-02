@@ -1214,19 +1214,26 @@ plugin.onLoad(async (p: any) => {
   }
 
   // 区分并加载网易云版本
-  // 当需要时可以在此检测版本，分别注入不同的 DOM 监视或者直接同时注入
-  injectV2(
-    updateCDImage,
-    addSettingsMenu,
-    addFullScreenButton,
-    calcAccentColor,
-  );
-  injectV3(
-    updateCDImage,
-    addSettingsMenu,
-    addFullScreenButton,
-    calcAccentColor,
-  );
+  // @ts-ignore
+  const ncmVersion =
+    typeof betterncm !== "undefined" ? betterncm.ncm.getNCMVersion() : "";
+  if (ncmVersion.startsWith("3.")) {
+    console.log("[RNP] Loading v3 inject logic...");
+    injectV3(
+      updateCDImage,
+      addSettingsMenu,
+      addFullScreenButton,
+      calcAccentColor,
+    );
+  } else {
+    console.log("[RNP] Loading v2 inject logic...");
+    injectV2(
+      updateCDImage,
+      addSettingsMenu,
+      addFullScreenButton,
+      calcAccentColor,
+    );
+  }
 
   new MutationObserver(() => {
     recalculateTitleSize();

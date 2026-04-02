@@ -122,9 +122,9 @@ function GradientBackground(props: {
   useEffect(() => {
     const image = new Image();
     image.crossOrigin = "Anonymous";
-    console.log("loading image");
+    console.log("[RNP] loading image");
     image.onload = () => {
-      console.log("image loaded");
+      console.log("[RNP] image loaded");
       const paletteObjs = getPaletteSync(image);
       const palette = paletteObjs!.map((c: any) => [
         c.rgb().r,
@@ -188,7 +188,7 @@ function FluidBackground(props: {
     }
     setSongId(id);
     fluidContainer.current.classList.toggle("paused", !playState.current);
-    //console.log(id, playState.current, state.split('|')[1], document.querySelector("#main-player .btnp").classList.contains("btnp-pause"));
+    //console.log("[RNP] Play state changed:", id, playState.current, state.split('|')[1], document.querySelector("#main-player .btnp").classList.contains("btnp-pause"));
   };
 
   useEffect(() => {

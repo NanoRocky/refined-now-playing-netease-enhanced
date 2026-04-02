@@ -41,10 +41,11 @@
             }
         },
         ">= 3.0.0": {
-            "orpheus://orpheus/pub/core": {
+            "orpheus://orpheus/pub/hybrid/vendors": {
                 "type": "replace",
-                "from": "function(t,i,e,r,n,a){var o;if(((this.U()||C).from||C).id==t)",
-                "to": "async function(t,i,e,r,n,a){;i='online';window.onProcessLyrics&&(a=(await onProcessLyrics(a,e)));var o;if(((this.U()||C).from||C).id==t)"
+                "id": "redux-dispatch-hook",
+                "from": "\"sagaEffects.put\"),",
+                "to": "\"sagaEffects.put\"),window?.rnpDispatchHook?.(n),"
             }
         }
     }
