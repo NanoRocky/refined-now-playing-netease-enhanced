@@ -35,7 +35,7 @@ export const PURE_MUSIC_LYRIC_LINE = [
   {
     time: 0,
     duration: 5940000,
-    originalLyric: "纯音乐，请欣赏",
+    originalLyric: "这首歌没有歌词诶！",
   },
 ];
 
@@ -46,7 +46,7 @@ export const PURE_MUSIC_LYRIC_DATA = {
   needDesc: true,
   lrc: {
     version: 1,
-    lyric: "[99:00.00]纯音乐，请欣赏\n",
+    lyric: "[99:00.00]这首歌没有歌词诶！\n",
   },
   code: 200,
   briefDesc: null,
