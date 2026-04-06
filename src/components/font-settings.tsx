@@ -42,7 +42,7 @@ export function FontSettings(props: {
       document.head.appendChild(style);
     }
     style.innerHTML = `
-			body.rnp-custom-font .g-single-track .lyric *,
+			body.rnp-custom-font .rnp-lyrics *,\n                        body.rnp-custom-font .rnp-mini-song-info *,\n                        body.rnp-custom-font .g-single-track .lyric *,
 			body.rnp-custom-font .n-single .head *,
 			body.rnp-custom-font .m-fm > *:not(.fmcmt) * {
 				font-family: ${fontFamily.length ? fontFamily.map((font: any) => `'${font}'`).join(", ") : "inherit"} !important;

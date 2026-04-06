@@ -80,6 +80,8 @@ export function ProgressbarPreview(props: {
 
   const subprogressbarInnerRef = useRef<any>(null);
 
+  const [_songId, songId, setSongId] = useRefState(null);
+
   const onLyricsUpdate = (e: any) => {
     if (!isCurrentModeSession()) {
       return;
@@ -111,11 +113,25 @@ export function ProgressbarPreview(props: {
 
   const onLoad = (_: any, info: any) => {
     setTotalLength(info.duration * 1000);
+    setSongId(info.id);
+  };
+  const onPlayStateChange = (state: string, id: string) => {
+    setSongId(id);
   };
   useEffect(() => {
     legacyNativeCmder.appendRegisterCall("Load", "audioplayer", onLoad);
+    legacyNativeCmder.appendRegisterCall(
+      "PlayState",
+      "audioplayer",
+      onPlayStateChange,
+    );
     return () => {
       legacyNativeCmder.removeRegisterCall("Load", "audioplayer", onLoad);
+      legacyNativeCmder.removeRegisterCall(
+        "PlayState",
+        "audioplayer",
+        onPlayStateChange,
+      );
     };
   }, []);
 
@@ -182,6 +198,56 @@ export function ProgressbarPreview(props: {
     updatePosition();
   }, [visible, currentLine]);
 
+  const onMouseDown = (e: any) => {
+    if (!getSetting("enable-high-precision-seek", true)) return;
+    e.stopPropagation();
+    e.preventDefault();
+
+    const getPercent = (clientX: number) => {
+      const rect = progressBarRef.current.getBoundingClientRect();
+      return Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    };
+
+    const updateNativeVisual = (percent: number) => {
+      const cur = progressBarRef.current.querySelector(".cur");
+      if (cur) cur.style.width = percent * 100 + "%";
+    };
+
+    const onMouseUp = (eup: any) => {
+      window.removeEventListener("mousemove", onWindowMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+
+      const finalPercent = getPercent(eup.clientX);
+      const time = _totalLength.current * finalPercent;
+
+      const sid = _songId.current || (window as any).currentLyrics?.songId;
+      if (sid && time !== undefined && !isNaN(time)) {
+        channel.call("audioplayer.seek", () => {}, [
+          sid,
+          `${sid}|seek|${Math.random().toString(36).substring(6)}`,
+          time / 1000,
+        ]);
+
+        // Let Netease visual state catch up or we manually force it
+        updateNativeVisual(finalPercent);
+      }
+    };
+
+    const onWindowMouseMove = (emove: any) => {
+      const percent = getPercent(emove.clientX);
+      updateNativeVisual(percent);
+      xRef.current = emove.clientX;
+      yRef.current = emove.clientY;
+      updateHoverPercent();
+      updatePosition();
+    };
+
+    window.addEventListener("mousemove", onWindowMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+
+    onWindowMouseMove(e);
+  };
+
   const onMouseEnter = (e: any) => {
     setVisible(true);
     xRef.current = e.clientX;
@@ -205,10 +271,12 @@ export function ProgressbarPreview(props: {
     progressBarRef.current.addEventListener("mouseenter", onMouseEnter);
     progressBarRef.current.addEventListener("mouseleave", onMouseLeave);
     progressBarRef.current.addEventListener("mousemove", onMouseMove);
+    progressBarRef.current.addEventListener("mousedown", onMouseDown);
     return () => {
       progressBarRef.current.removeEventListener("mouseenter", onMouseEnter);
       progressBarRef.current.removeEventListener("mouseleave", onMouseLeave);
       progressBarRef.current.removeEventListener("mousemove", onMouseMove);
+      progressBarRef.current.removeEventListener("mousedown", onMouseDown);
     };
   }, [progressBarRef.current]);
 
